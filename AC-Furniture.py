@@ -135,20 +135,20 @@ def ac_furniture():
         geom_workarea = geom_functionarea
     
     
-    def ac_geom3d_table(geom2d):
+    #def ac_geom3d_table(geom2d):
         
         
-        startpt = (0,0,0)
-        endpt = (0,0,furniture_hight)
-        print geom2d
-        rs.AddPoint(endpt)
-        translation = startpt+endpt
+        #startpt = (0,0,0)
+        #endpt = (0,0,furniture_hight)
+        #print geom2d
+        #rs.AddPoint(endpt)
+        #translation = startpt+endpt
         #rs.CopyObject(geom2d)
         
-        id = rs.GetObject("Select object to copy")
-        print id
+        #id = rs.GetObject("Select object to copy")
+        #print id
         
-        rs.CopyObject(id, translation)
+        #rs.CopyObject(id, translation)
     
     
     
@@ -227,9 +227,10 @@ def ac_furniture():
     rs.CurrentLayer(layer=layer_geom2d)
     ac_geom2d(furniture_width, furniture_depth)
     
-    ac_geom3d_table(geom2d)
+    #ac_geom3d_table(geom2d)
     
     #Generate Block and insert
+    rs.CurrentLayer(layer_furniture)
     rs.AddBlock([geom_text,geom2d, geom_workarea, geom_functionarea], basepoint, blockname, delete_input=True)
     rs.InsertBlock(blockname, basepoint)
     
