@@ -20,7 +20,7 @@ import Rhino as rhino
 
 
 def ac_furniture():
-    global geom_functionarea, geom_workarea
+    global geom_functionarea, geom_workarea, geom2d
     
     def ac_layercreation():
         
@@ -66,9 +66,10 @@ def ac_furniture():
         rs.AddLayer(layer_geom3d, layer_geom3d_color, parent=layer_furniture)
     
         rs.AddLayer(layer_workarea, layer_workarea_color, parent=layer_furniture)
-    
+        rs.LayerLinetype(layer_workarea, linetype="Dashed")
+        
         rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
-        rs.LayerLinetype(layer_text, linetype="Dashed")
+        
     
     
         rs.AddLayer(layer_functionarea, layer_functionarea_color, parent=layer_furniture)
@@ -91,8 +92,8 @@ def ac_furniture():
         
         #info text
         textdottext = (furniture_name + "\n" 
-        + str(furniture_width_cm)+ " x " + str(furniture_depth_cm) + "\n" 
-        + "newline")
+        + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))# + "\n" 
+        #+ "newline")
         
         
         #rs.AddPoint(geom2d_centroid[0])
@@ -134,7 +135,20 @@ def ac_furniture():
         geom_workarea = geom_functionarea
     
     
-    
+    def ac_geom3d_table(geom2d):
+        
+        
+        startpt = (0,0,0)
+        endpt = (0,0,furniture_hight)
+        print geom2d
+        rs.AddPoint(endpt)
+        translation = startpt+endpt
+        #rs.CopyObject(geom2d)
+        
+        id = rs.GetObject("Select object to copy")
+        print id
+        
+        rs.CopyObject(id, translation)
     
     
     
@@ -203,7 +217,7 @@ def ac_furniture():
     print furniture_name
 
 
-
+    
 
 
 
@@ -213,10 +227,14 @@ def ac_furniture():
     rs.CurrentLayer(layer=layer_geom2d)
     ac_geom2d(furniture_width, furniture_depth)
     
+    ac_geom3d_table(geom2d)
+    
+    #Generate Block and insert
     rs.AddBlock([geom_text,geom2d, geom_workarea, geom_functionarea], basepoint, blockname, delete_input=True)
     rs.InsertBlock(blockname, basepoint)
     
-
+    
+    
 
 
 
