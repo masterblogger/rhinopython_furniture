@@ -28,7 +28,7 @@ def ac_furniture():
     layer_furniture_color = [0,0,0]
     
     #Enter / Edit Here your furniture layer names EDIT ONLY VALUES IN PARANTHESES,
-    #default :3D geom Color red = [255,0,0]
+    #default :2 geom Color red = [255,0,0]
     layer_geom2d = ("AC-Geom2d")
     layer_geom2d_color = [255,0,0]
     
@@ -40,7 +40,7 @@ def ac_furniture():
     layer_workarea = ("AC-Working_area")
     layer_workarea_color = [0,255,255]
     
-    #default : workarea Color blue = [0,0,0]
+    #default : Text Color blue = [0,0,0]
     layer_text = ("AC-Text")
     layer_text_color = [0,0,0]
     
@@ -52,9 +52,11 @@ def ac_furniture():
     
     
     
+    
     def ac_geom2d(width, depth):
         global geom_text, geom2d, blockname, basepoint
         
+        rs.CurrentLayer(layer_geom2d)
         planexy = rs.WorldXYPlane()
         geom2d = rs.AddRectangle(planexy, width, depth)
         
@@ -77,7 +79,19 @@ def ac_furniture():
         #Generate Blockname
         blockname = (str(furniture_name) + str(width) + "x" + str(depth))
         
-    
+        
+        
+        
+    def ac_geom2d_workarea(width):
+        global geom_workarea
+        
+        planexy_wa = rs.WorldXYPlane()
+        
+        
+        # Reference (2018 august 08) https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/pdf/ASR-A1-2.pdf?__blob=publicationFile&v=7
+        depth_workarea = -1000
+        rs.CurrentLayer(layer_workarea)
+        geom_workarea = rs.AddRectangle(planexy_wa, width, depth_workarea)
     #############################
     ##FUNCTION DEFINITIONS END###
     #############################
@@ -91,8 +105,11 @@ def ac_furniture():
     furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk", 5, 0, 5 )
     print furniture_typ
     
+    #Get Furniture Dimensions and Scale them to mm
     furniture_width = rs.GetReal("Width of furniture [cm]", 80, 0)
+    furniture_width = furniture_width * 10
     furniture_depth = rs.GetReal("Depth of furniture [cm]", 42, 0)
+    furniture_depth = furniture_depth * 10
     
     print ("width")
     print furniture_width
@@ -112,12 +129,21 @@ def ac_furniture():
     
     elif furniture_typ == 2:
         furniture_name = "Shelf"
+        
+    
     elif furniture_typ == 3:
         furniture_name = "Sideboard"
+        
+    
     elif furniture_typ == 4:
         furniture_name = "Table"
+        
+    
     elif furniture_typ == 5:
         furniture_name = "Desk"
+        
+        rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
+        ac_geom2d_workarea(furniture_width)
     #elif furniture_typ == 3:
     #    furniture_name = "XXX"
     
@@ -134,13 +160,14 @@ def ac_furniture():
     rs.AddLayer(layer_geom3d, layer_geom3d_color, parent=layer_furniture)
     rs.AddLayer(layer_workarea, layer_workarea_color, parent=layer_furniture)
     rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
+    rs.LayerLinetype(layer_text, linetype="Dashed")
     
     
     
     rs.CurrentLayer(layer=layer_geom2d)
     ac_geom2d(furniture_width, furniture_depth)
     
-    rs.AddBlock([geom_text,geom2d], basepoint, blockname, delete_input=True)
+    rs.AddBlock([geom_text,geom2d,geom_workarea], basepoint, blockname, delete_input=True)
     rs.InsertBlock(blockname, basepoint)
     
 
