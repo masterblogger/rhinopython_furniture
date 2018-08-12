@@ -20,29 +20,35 @@ import Rhino as rhino
 
 
 def ac_furniture():
+    global geom_functionarea, geom_workarea
     
-    
-    
-    #Parent layer 
-    layer_furniture = ("Furniture")
-    layer_furniture_color = [0,0,0]
+    def ac_layercreation():
+        
+        global layer_furniture, layer_geom2d, layer_geom3d, layer_workarea, layer_text, layer_functionarea, layer_furniture_color, layer_geom2d_color, layer_geom3d_color, layer_workarea_color, layer_functionarea_color, layer_text_color
+    #Parent layer
+        layer_furniture = ("Furniture")
+        layer_furniture_color = [0,0,0]
     
     #Enter / Edit Here your furniture layer names EDIT ONLY VALUES IN PARANTHESES,
     #default :2 geom Color red = [255,0,0]
-    layer_geom2d = ("AC-Geom2d")
-    layer_geom2d_color = [255,0,0]
+        layer_geom2d = ("AC-Geom2d")
+        layer_geom2d_color = [255,0,0]
     
     #default :3D geom Colorwhite = [255,255,255]
-    layer_geom3d = ("AC-Geom3d")
-    layer_geom3d_color = [255,255,255]
+        layer_geom3d = ("AC-Geom3d")
+        layer_geom3d_color = [255,255,255]
     
     #default : workarea Color blue = [0,255,255]
-    layer_workarea = ("AC-Working_area")
-    layer_workarea_color = [0,255,255]
+        layer_workarea = ("AC-Working_area")
+        layer_workarea_color = [0,255,255]
+    
+    #default : workarea Color blue = [0,255,255]
+        layer_functionarea = ("AC-Function_area")
+        layer_functionarea_color = [0,255,255]
     
     #default : Text Color blue = [0,0,0]
-    layer_text = ("AC-Text")
-    layer_text_color = [0,0,0]
+        layer_text = ("AC-Text")
+        layer_text_color = [0,0,0]
     
     
     #############################
@@ -50,7 +56,23 @@ def ac_furniture():
     ##############################
     
     
+
+        
+        #Add layer after previous operation are succesfull
+        rs.AddLayer(layer_furniture, layer_furniture_color)
     
+        rs.AddLayer(layer_geom2d, layer_geom2d_color, parent=layer_furniture)
+    
+        rs.AddLayer(layer_geom3d, layer_geom3d_color, parent=layer_furniture)
+    
+        rs.AddLayer(layer_workarea, layer_workarea_color, parent=layer_furniture)
+    
+        rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
+        rs.LayerLinetype(layer_text, linetype="Dashed")
+    
+    
+        rs.AddLayer(layer_functionarea, layer_functionarea_color, parent=layer_furniture)
+        rs.LayerLinetype(layer_functionarea, linetype="Dashed")
     
     
     def ac_geom2d(width, depth):
@@ -69,7 +91,7 @@ def ac_furniture():
         
         #info text
         textdottext = (furniture_name + "\n" 
-        + str(width)+ " x " + str(depth) + "\n" 
+        + str(furniture_width_cm)+ " x " + str(furniture_depth_cm) + "\n" 
         + "newline")
         
         
@@ -77,13 +99,15 @@ def ac_furniture():
         geom_text = rs.AddTextDot(textdottext, geom2d_centroid[0])
         #rhino.text
         #Generate Blockname
-        blockname = (str(furniture_name) + str(width) + "x" + str(depth))
+        blockname = (str(furniture_name) + str(furniture_width_cm) + "x" + str(furniture_depth_cm))
+        
+        
         
         
         
         
     def ac_geom2d_workarea(width):
-        global geom_workarea
+        global geom_workarea, geom_functionarea
         
         planexy_wa = rs.WorldXYPlane()
         
@@ -92,6 +116,29 @@ def ac_furniture():
         depth_workarea = -1000
         rs.CurrentLayer(layer_workarea)
         geom_workarea = rs.AddRectangle(planexy_wa, width, depth_workarea)
+        
+        
+        geom_functionarea = geom_workarea
+    
+    def ac_geom2d_functionarea(width, depth):
+        global geom_functionarea, geom_workarea
+        
+        planexy_wa = rs.WorldXYPlane()
+        
+        
+        # Reference (2018 august 08) https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/pdf/ASR-A1-2.pdf?__blob=publicationFile&v=7
+        depth = depth * -1 
+        rs.CurrentLayer(layer_functionarea)
+        geom_functionarea = rs.AddRectangle(planexy_wa, width, depth)
+        
+        geom_workarea = geom_functionarea
+    
+    
+    
+    
+    
+    
+    
     #############################
     ##FUNCTION DEFINITIONS END###
     #############################
@@ -100,20 +147,19 @@ def ac_furniture():
     
     print("hello")
     
-    #filling cabinet = aktenschrank, shelf=regal
+    #filling cabine
+    #t = aktenschrank, shelf=regal
     
     furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk", 5, 0, 5 )
     print furniture_typ
     
     #Get Furniture Dimensions and Scale them to mm
-    furniture_width = rs.GetReal("Width of furniture [cm]", 80, 0)
-    furniture_width = furniture_width * 10
-    furniture_depth = rs.GetReal("Depth of furniture [cm]", 42, 0)
-    furniture_depth = furniture_depth * 10
+    furniture_width_cm = rs.GetReal("Width of furniture [cm]", 80, 0)
+    furniture_width = furniture_width_cm * 10
+    furniture_depth_cm = rs.GetReal("Depth of furniture [cm]", 42, 0)
+    furniture_depth = furniture_depth_cm * 10
     
-    print ("width")
-    print furniture_width
-    print furniture_depth
+        
     
     if bool(furniture_typ) != 1 or 2 or 3:
         
@@ -122,25 +168,31 @@ def ac_furniture():
         print("noPenis")
         furniture_hight = 80
 
+    ac_layercreation()
+
 
     #Add text to textvariable
     if furniture_typ == 1:
         furniture_name = "filling cabinet"
+        ac_geom2d_functionarea(furniture_width, furniture_depth)
     
     elif furniture_typ == 2:
         furniture_name = "Shelf"
-        
+        ac_geom2d_functionarea(furniture_width, furniture_depth)
     
     elif furniture_typ == 3:
         furniture_name = "Sideboard"
-        
+        ac_geom2d_functionarea(furniture_width, furniture_depth)
     
     elif furniture_typ == 4:
         furniture_name = "Table"
         
+        geom_functionarea = rs.AddPoint( (0,0,0) )
+        geom_workarea = geom_functionarea
     
     elif furniture_typ == 5:
         furniture_name = "Desk"
+        
         
         rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
         ac_geom2d_workarea(furniture_width)
@@ -154,20 +206,14 @@ def ac_furniture():
 
 
 
-    #Add layer after previous operation are succesfull
-    rs.AddLayer(layer_furniture, layer_furniture_color)
-    rs.AddLayer(layer_geom2d, layer_geom2d_color, parent=layer_furniture)
-    rs.AddLayer(layer_geom3d, layer_geom3d_color, parent=layer_furniture)
-    rs.AddLayer(layer_workarea, layer_workarea_color, parent=layer_furniture)
-    rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
-    rs.LayerLinetype(layer_text, linetype="Dashed")
-    
+
+
     
     
     rs.CurrentLayer(layer=layer_geom2d)
     ac_geom2d(furniture_width, furniture_depth)
     
-    rs.AddBlock([geom_text,geom2d,geom_workarea], basepoint, blockname, delete_input=True)
+    rs.AddBlock([geom_text,geom2d, geom_workarea, geom_functionarea], basepoint, blockname, delete_input=True)
     rs.InsertBlock(blockname, basepoint)
     
 
