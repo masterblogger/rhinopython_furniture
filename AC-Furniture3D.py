@@ -556,7 +556,7 @@ def ac_furniture():
     print len(obj2d_function)
 
     #add all objects curves and polysrf to array/list
-    obj3d = rs.ObjectsByType(16, select=False, state = 0)
+    obj3d = rs.ObjectsByType(16, select=False, state = 1)
     blockobj = [geom_text,geom2d, geom_workarea, geom_functionarea]
     blockobj.extend(obj3d)
     blockobj.extend(obj2d_function)
