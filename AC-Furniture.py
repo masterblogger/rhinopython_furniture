@@ -32,8 +32,6 @@ def ac_furniture():
   
   
   
-  
-  
     #############################
     ##FUNCTION DEFINITIONS BEGIN##
     ##############################
