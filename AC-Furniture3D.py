@@ -9,8 +9,6 @@
 #
 # NO WARRANTY
 #
-# Only Desk and Table are availible as 3D objects
-#
 # Note: If you want to create a rhino command that you can call via command promt
 # look here: https://developer.rhino3d.com/guides/rhinopython/creating-rhino-commands-using-python/
 
@@ -22,8 +20,14 @@ import Rhino as rhino
 
 
 def ac_furniture():
-    global geom_functionarea, geom_workarea, geom2d
+    global geom_functionarea, geom_workarea, geom2d, group3d, obj, obj2d_function
   
+    group3d = "geom3d"
+    rs.AddGroup(group3d)
+    
+    
+    obj2d_function = []
+ 
   
   
   
@@ -94,6 +98,8 @@ def ac_furniture():
         
         rs.AddLayer(layer_functionarea, layer_functionarea_color, parent=layer_furniture)
         rs.LayerLinetype(layer_functionarea, linetype="Dashed")
+        
+        rs.CurrentLayer(layer_furniture)
     
     
     def ac_geom2d(width, depth):
@@ -156,7 +162,7 @@ def ac_furniture():
         geom_workarea = geom_functionarea
     
     
-    def ac_geom3d_table(geom2d):
+    def ac_geom3d_table():
         
         global table_foot_3d, geom3d
         rs.CurrentLayer(layer_geom3d_pro)
@@ -202,6 +208,10 @@ def ac_furniture():
         table_table = rs.ExtrudeCurveStraight(table_table, (0,0,0),(0,0,20))
         table_table = rs.CapPlanarHoles(table_table)
         
+        
+        #add polysurfaces objects to group
+        obj = rs.ObjectsByType(16, select=False, state = 0)
+        rs.AddObjectsToGroup(obj,group3d)
     
     def ac_geom3d_desk():
         #plane = rs.WorldYZPlane()
@@ -209,8 +219,10 @@ def ac_furniture():
         #plane = rs.PlaneFromPoints((0,420,0),(0,0,50),(0,0,0))
         thickness_elements = 50
         
+        rs.CurrentLayer(layer_geom3d)
         #plane = (42,80,0)
         #rs.AddArc(plane, 50, 90)
+        
         def ac_geom3d_desk_foot(base):
             
             if base > 0:
@@ -249,18 +261,203 @@ def ac_furniture():
         table_table = rs.ExtrudeCurveStraight(table_table, (0,0,0),(0,0,20))
         table_table = rs.CapPlanarHoles(table_table)
         
+        #add polysurfaces objects to group
+        obj = rs.ObjectsByType(16, select=False, state = 0)
+        rs.AddObjectsToGroup(obj,group3d)
         
         
+    def ac_geom3d_shelf_cabinet():
+        global shelf_objects
+        
+        wallthicknesss = 20
+        rs.CurrentLayer(layer_geom3d)
+        
+        
+        
+        
+        
+        def ac_geom3d_shelf_cabinet_sidewall(base):
+            global sw
+            
+            if base > 0:
+                base = base - wallthicknesss
+            
+            sw_pt1 = (base,0,0)
+            #sw_pt2 = (base, furniture_depth, 0)
+            #plane = rs.WorldXYPlane()
+            sw = rs.AddRectangle(sw_pt1, wallthicknesss,  furniture_depth)
+            
+            sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
+            sw = rs.CapPlanarHoles(sw)
+        
+        def ac_geom3d_shelf_cabinet_inside():
+            
+            
+            base = (wallthicknesss, wallthicknesss, 50)
+            shelf_width = furniture_width - 2 * wallthicknesss
+            shelf_depth = furniture_depth - 2 * wallthicknesss
+            bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
+            bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, (wallthicknesss,wallthicknesss,0))
+            bottom_shelf = rs.CapPlanarHoles(bottom_shelf)
+            
+            if furniture_hight >= 700:
+                shelf_distance = 350 + wallthicknesss
+                shelf_count = furniture_hight / shelf_distance
+                
+                #start posistion -> 50 for distance between bottom shelf
+                shelf_position = shelf_distance + 50
+                
+                print "shelf Count"
+                print shelf_count
+                #round up
+                shelf_count = shelf_count -1.5
+                print "shelf Count"
+                print shelf_count
+                
+                
+                loopbreaker = 0
+                while loopbreaker < shelf_count:
+                    
+                    base = (wallthicknesss, wallthicknesss, shelf_position)
+                    
+                    shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
+                    
+                    
+                    #
+                    base_extrude_target = (wallthicknesss, wallthicknesss, (shelf_position + wallthicknesss))
+                    shelf = rs.ExtrudeCurveStraight(shelf, base, base_extrude_target)
+                    
+                    shelf = rs.CapPlanarHoles(shelf)
+                    
+                    
+                    shelf_position = shelf_position + shelf_distance
+                    
+                    loopbreaker = loopbreaker + 1
+                    
+                    
+        
+        #back wall
+        bw_pt = (wallthicknesss, furniture_depth, 0)
+        bw_width = furniture_width - 2* wallthicknesss
+                
+        bw =rs.AddRectangle(bw_pt, bw_width, (wallthicknesss * -1))
+        bw1 = rs.ExtrudeCurveStraight(bw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
+        bw = rs.CapPlanarHoles(bw1)
+        
+        
+
+        
+        #top
+        tw_pt = (0,0,(furniture_hight- wallthicknesss))
+        tw_pt_target = (0,0, furniture_hight)
+        tw = rs.AddRectangle(tw_pt, furniture_width, furniture_depth)
+        tw = rs.ExtrudeCurveStraight(tw, tw_pt, tw_pt_target)
+        tw = rs.CapPlanarHoles(tw)
+        
+
+        
+        #Execute Functions
+        ac_geom3d_shelf_cabinet_sidewall(0)
+
+        
+        ac_geom3d_shelf_cabinet_sidewall(furniture_width)
+
+        
+        ac_geom3d_shelf_cabinet_inside()
+        
+        
+        #add polysurfaces objects to group
+        obj = rs.ObjectsByType(16, select=False, state = 0)
+        geom3d = rs.AddObjectsToGroup(obj,group3d)
+        
+        
+    def ac_geom3d_wing_door():
+        
+        
+        wallthicknesss = 20
+        door_width = furniture_width / 2 - wallthicknesss
+        
+        
+        def ac_geom3d_wing_door_itself(base):
+            rotate = "flase"
+            base_ogirinal = base
+            if base > 0:
+                base = base / 2 - wallthicknesss
+                rotate = "true"
+            
+            wdpt = (base + wallthicknesss, 0, 30)
+            wdtarget_hight = (furniture_hight - wallthicknesss)
+            wdtarget = (base + wallthicknesss,0,wdtarget_hight)
+            door1 = rs.AddRectangle(wdpt, door_width, wallthicknesss)
+            door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
+            
+            if rotate == "true":
+                wdp2 = (base_ogirinal - wallthicknesss, 0, 30)
+                rs.RotateObject(door1,wdp2,30,None, copy=False)
+            
+            
+            door1 = rs.CapPlanarHoles(door1)
+            
+            
+        def ac_geom2d_wing_door(base):
+            global  obj2d_function
+            
+            rs.CurrentLayer(layer_functionarea)
+            start_y_distance = (-1 * furniture_depth)
+            startpt = ((furniture_width / 2), 0 ,0)
+            endpt = (wallthicknesss,start_y_distance,0)
+            
+            point_on_arc_x = (furniture_width / 2) * +0.90
+            point_on_arc_y = furniture_depth * -0.33
+            point_on_arc = (point_on_arc_x, point_on_arc_y, 0)
+            
+            line =rs.AddLine(endpt, (wallthicknesss,0,0))
+            
+            arc = rs.AddArc3Pt(endpt, startpt,point_on_arc)
+            opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
+            
+            opening_projection2 = rs.MirrorObject(opening_projection1, ((furniture_width /2),0,0), ((furniture_width /2),wallthicknesss,0),copy=True)
+            
+            
+            obj2d_function = [opening_projection2,opening_projection1]
+            print "XXXXXXXXX"
+            print len(obj2d_function)
+            #obj2d_function.append(opening_projection1)
+            
+        ac_geom3d_wing_door_itself(0)
+        ac_geom3d_wing_door_itself(furniture_width)
+        
+        ac_geom2d_wing_door(0)
+        
+        
+
+
+    def ac_lock_prevlayer():
+        
+        
+        layername = rs.LayerNames()
+        
+        print "layerbane"
+        print layername[1]
+        print len(layername)
+        loopbreaker = 0
+        
+        
+        
+        while loopbreaker < len(layername):
+            rs.LayerLocked(layername[loopbreaker], locked=True)
+            loopbreaker = loopbreaker + 1
+            print "loop"
+            print loopbreaker
+
     #############################
     ##FUNCTION DEFINITIONS END###
     #############################
     
+    #lock all existing layers
     
     
-    print("hello")
     
-    #filling cabine
-    #t = aktenschrank, shelf=regal
     
     furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk", 5, 0, 5 )
     print furniture_typ
@@ -286,27 +483,36 @@ def ac_furniture():
         
 
     ac_layercreation()
-
+    
+    ac_lock_prevlayer()
 
     #Add text to textvariable
     if furniture_typ == 1:
+        #filling cabinet furniture like shelf with wing doors
         furniture_name = "filling cabinet"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
-    
+        ac_geom3d_shelf_cabinet()
+        ac_geom3d_wing_door()
+        
+        
     elif furniture_typ == 2:
         furniture_name = "Shelf"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
+        ac_geom3d_shelf_cabinet()
     
     elif furniture_typ == 3:
+        #sideboard shelf with sliding door
         furniture_name = "Sideboard"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
+        ac_geom3d_shelf_cabinet()
     
     elif furniture_typ == 4:
         furniture_name = "Table"
         
         geom_functionarea = rs.AddPoint( (0,0,0) )
         geom_workarea = geom_functionarea
-        ac_geom3d_table(geom2d)
+        ac_geom3d_table()
+        
     
     elif furniture_typ == 5:
         furniture_name = "Desk"
@@ -318,25 +524,54 @@ def ac_furniture():
     #    furniture_name = "XXX"
     
     
-    print furniture_name
-
-
     
-
-
-
-
-    
+   
     
     rs.CurrentLayer(layer=layer_geom2d)
     ac_geom2d(furniture_width, furniture_depth)
     
     
     
-    #Generate Block and insert
+    rs.CurrentLayer(layer=layer_furniture)
+    
+    #clean useless geom and lock layers
+    #lock partial
+    rs.LayerLocked(layer_geom2d, locked = True)
+    rs.LayerLocked(layer_geom3d_pro, locked = True)
+    rs.LayerLocked(layer_workarea, locked = True)
+    rs.LayerLocked(layer_functionarea, locked = True)
+    rs.LayerLocked(layer_text, locked = True)
+    #clean
+    obj_delete = rs.ObjectsByType(4, select=False, state=1)
+    rs.DeleteObjects(obj_delete)
+    
+    #unlock layers
+    rs.LayerLocked(layer_geom2d, locked = False)
+    rs.LayerLocked(layer_geom3d_pro, locked = False)
+    rs.LayerLocked(layer_workarea, locked = False)
+    rs.LayerLocked(layer_functionarea, locked = False)
+    rs.LayerLocked(layer_text, locked = False)
+    
+    print "objd function value"
+    print len(obj2d_function)
+
+    #add all objects curves and polysrf to array/list
+    obj3d = rs.ObjectsByType(16, select=False, state = 0)
+    blockobj = [geom_text,geom2d, geom_workarea, geom_functionarea]
+    blockobj.extend(obj3d)
+    blockobj.extend(obj2d_function)
+    
+    #if len(opening_projection) > 0:
+     #   blockobj.extend(opening_projection)
+    
+    
     rs.CurrentLayer(layer_furniture)
-    rs.AddBlock([geom_text,geom2d, geom_workarea, geom_functionarea], basepoint, blockname, delete_input=True)
+    rs.AddBlock(blockobj, basepoint, blockname, delete_input=True)
     rs.InsertBlock(blockname, basepoint)
+    
+    #rs.CurrentLayer(layer_furniture)
+    #rs.AddBlock([geom_text,geom2d, geom_workarea, geom_functionarea, obj3d[1]], basepoint, blockname, delete_input=True)
+    #rs.InsertBlock(blockname, basepoint)
     
     
     
