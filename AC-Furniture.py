@@ -56,7 +56,7 @@ def ac_furniture():
         #default :3D geom Colorwhite = [255,255,255]
         layer_geom3d = ("AC-Geom3d")
         layer_geom3d_color = [255,255,255]
-    
+        
         #default :3D geom Colorwhite = [190,190,190]
         layer_geom3d_pro = ("AC-Geom3d_projection")
         layer_geom3d_projection_color = [190,190,190]
@@ -64,7 +64,7 @@ def ac_furniture():
         #default : workarea Color blue = [0,255,255]
         layer_workarea = ("AC-Working_area")
         layer_workarea_color = [0,255,255]
-    
+        
         #default : workarea Color blue = [0,255,255]
         layer_functionarea = ("AC-Function_area")
         layer_functionarea_color = [0,255,255]
@@ -81,11 +81,11 @@ def ac_furniture():
         
         #Add layer after previous operation are succesfull
         rs.AddLayer(layer_furniture, layer_furniture_color)
-    
+        
         rs.AddLayer(layer_geom2d, layer_geom2d_color, parent=layer_furniture)
-    
+        
         rs.AddLayer(layer_geom3d, layer_geom3d_color, parent=layer_furniture)
-    
+        
         rs.AddLayer(layer_workarea, layer_workarea_color, parent=layer_furniture)
         rs.LayerLinetype(layer_workarea, linetype="Dashed")
         
@@ -214,8 +214,11 @@ def ac_furniture():
         while loop_count < len(table_foot_2d):
             
             table_foot = rs.ExtrudeCurveStraight(table_foot_2d[loop_count], (0,0,0),(0,0,furniture_hight))
-            table_foot = rs.CapPlanarHoles(table_foot)
+            rs.CapPlanarHoles(table_foot)
             table_foot_3d.append(table_foot)
+            
+            #add material to table-legs
+            ac_material_surface(table_foot, "leg")
             
             loop_count = loop_count + 1
             
@@ -223,22 +226,23 @@ def ac_furniture():
         plane_rectangle_pt = (0, 0, furniture_hight)
         table_table = rs.AddRectangle(plane_rectangle_pt, furniture_width, furniture_depth)
         table_table = rs.ExtrudeCurveStraight(table_table, (0,0,0),(0,0,20))
-        table_table = rs.CapPlanarHoles(table_table)
+        rs.CapPlanarHoles(table_table)
         
         
         #add polysurfaces objects to group
         obj = rs.ObjectsByType(16, select=False, state = 0)
         rs.AddObjectsToGroup(obj,group3d)
+        
+        
+        #add material to table surface
+        ac_material_surface(table_table, "srf")
     
     def ac_geom3d_desk():
-        #plane = rs.WorldYZPlane()
-        #rs.AddArc(plane, 50, 90)
-        #plane = rs.PlaneFromPoints((0,420,0),(0,0,50),(0,0,0))
+
         thickness_elements = 50
         
         rs.CurrentLayer(layer_geom3d)
-        #plane = (42,80,0)
-        #rs.AddArc(plane, 50, 90)
+
         
         def ac_geom3d_desk_foot(base):
             
@@ -267,7 +271,10 @@ def ac_furniture():
             base = (base + thickness_elements/2, furniture_depth/2, thickness_elements)
             hight = furniture_hight - thickness_elements
             radius = thickness_elements / 2 
-            rs.AddCylinder(base, hight, radius, cap=True)
+            cylinderfoot =rs.AddCylinder(base, hight, radius, cap=True)
+            
+            #add material to elements
+            ac_material_surface(cylinderfoot, "leg")
             
         ac_geom3d_desk_foot(0)
         ac_geom3d_desk_foot(furniture_width)
@@ -276,7 +283,14 @@ def ac_furniture():
         plane_rectangle_pt = (0, 0, furniture_hight)
         table_table = rs.AddRectangle(plane_rectangle_pt, furniture_width, furniture_depth)
         table_table = rs.ExtrudeCurveStraight(table_table, (0,0,0),(0,0,20))
-        table_table = rs.CapPlanarHoles(table_table)
+        
+        rs.CapPlanarHoles(table_table)
+        
+        
+        
+        #Add Material Color
+        ac_material_surface(table_table, "srf")
+        
         
         #add polysurfaces objects to group
         obj = rs.ObjectsByType(16, select=False, state = 0)
@@ -305,7 +319,10 @@ def ac_furniture():
             sw = rs.AddRectangle(sw_pt1, wallthicknesss,  furniture_depth)
             
             sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
-            sw = rs.CapPlanarHoles(sw)
+            rs.CapPlanarHoles(sw)
+            
+            #add material 
+            ac_material_surface(sw, "srf")
         
         def ac_geom3d_shelf_cabinet_inside():
             
@@ -315,7 +332,10 @@ def ac_furniture():
             shelf_depth = furniture_depth - 2 * wallthicknesss
             bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
             bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, (wallthicknesss,wallthicknesss,0))
-            bottom_shelf = rs.CapPlanarHoles(bottom_shelf)
+            rs.CapPlanarHoles(bottom_shelf)
+            
+            #Add material to obj
+            ac_material_surface(bottom_shelf, "srf")
             
             if furniture_hight >= 700:
                 shelf_distance = 350 + wallthicknesss
@@ -344,24 +364,28 @@ def ac_furniture():
                     base_extrude_target = (wallthicknesss, wallthicknesss, (shelf_position + wallthicknesss))
                     shelf = rs.ExtrudeCurveStraight(shelf, base, base_extrude_target)
                     
-                    shelf = rs.CapPlanarHoles(shelf)
+                    rs.CapPlanarHoles(shelf)
+                    
+                    
                     
                     
                     shelf_position = shelf_position + shelf_distance
                     
                     loopbreaker = loopbreaker + 1
                     
-                    
+                    #add material
+                    ac_material_surface(shelf, "srf")
         
         #back wall
         bw_pt = (wallthicknesss, furniture_depth, 0)
         bw_width = furniture_width - 2* wallthicknesss
                 
         bw =rs.AddRectangle(bw_pt, bw_width, (wallthicknesss * -1))
-        bw1 = rs.ExtrudeCurveStraight(bw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
-        bw = rs.CapPlanarHoles(bw1)
+        bw = rs.ExtrudeCurveStraight(bw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
+        rs.CapPlanarHoles(bw)
         
-        
+        #add material to object back
+        ac_material_surface(bw, "srf")
 
         
         #top
@@ -369,9 +393,10 @@ def ac_furniture():
         tw_pt_target = (0,0, furniture_hight)
         tw = rs.AddRectangle(tw_pt, furniture_width, furniture_depth)
         tw = rs.ExtrudeCurveStraight(tw, tw_pt, tw_pt_target)
-        tw = rs.CapPlanarHoles(tw)
+        rs.CapPlanarHoles(tw)
         
-
+        #add material to object top
+        ac_material_surface(tw, "srf")
         
         #Execute Functions
         ac_geom3d_shelf_cabinet_sidewall(0)
@@ -386,6 +411,9 @@ def ac_furniture():
         #add polysurfaces objects to group
         obj = rs.ObjectsByType(16, select=False, state = 0)
         geom3d = rs.AddObjectsToGroup(obj,group3d)
+        
+        
+        
         
         
     def ac_geom3d_wing_door():
@@ -408,12 +436,16 @@ def ac_furniture():
             door1 = rs.AddRectangle(wdpt, door_width, wallthicknesss)
             door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
             
+            
             if rotate == "true":
                 wdp2 = (base_ogirinal - wallthicknesss, 0, 30)
                 rs.RotateObject(door1,wdp2,30,None, copy=False)
             
             
-            door1 = rs.CapPlanarHoles(door1)
+            rs.CapPlanarHoles(door1)
+            
+            #add material to object
+            ac_material_surface(door1, "srf")
             
             
         def ac_geom2d_wing_door(base):
@@ -476,6 +508,26 @@ def ac_furniture():
         author = "Joern Rettweiler \n 2018 august"
         branding = rs.AddText(author,pt, height=1)
         
+    
+    def ac_material_surface(mat2obj, element):
+        #Add Material Color, edit rgb values if you want another colors
+        
+        if element == "srf":
+            material_color = (255,245, 215)
+        elif element == "leg":
+            material_color = (230,230,230)
+        
+        
+        index_material = rs.AddMaterialToObject(mat2obj)
+        
+        mcolor = rs.MaterialColor(index_material, material_color) #ahorn
+        print "mcolor:"
+        print mcolor
+
+        rs.MaterialName(index_material, "Furniture_Surface")
+    
+        print "indexmateri"
+        print index_material
         
     #############################
     ##FUNCTION DEFINITIONS END###
@@ -593,17 +645,16 @@ def ac_furniture():
     blockobj.extend(obj2d_function)
     blockobj.append(branding)
     
-    #if len(opening_projection) > 0:
-     #   blockobj.extend(opening_projection)
+
     
     
     rs.CurrentLayer(layer_furniture)
     rs.AddBlock(blockobj, basepoint, blockname, delete_input=True)
     rs.InsertBlock(blockname, basepoint)
     
-    #rs.CurrentLayer(layer_furniture)
-    #rs.AddBlock([geom_text,geom2d, geom_workarea, geom_functionarea, obj3d[1]], basepoint, blockname, delete_input=True)
-    #rs.InsertBlock(blockname, basepoint)
+    
+    
+    
     
     
     
