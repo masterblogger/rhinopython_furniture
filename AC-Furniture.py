@@ -2,7 +2,7 @@
 # 
 # GNU GENERAL PUBLIC LICENSE Version 3
 #
-# by Joern Rettweiler, 2018 august 13
+# by Joern Rettweiler, 2018 august 14
 #
 #
 # Tested with Rhino 5 
@@ -297,10 +297,14 @@ def ac_furniture():
         rs.AddObjectsToGroup(obj,group3d)
         
         
-    def ac_geom3d_shelf_cabinet():
+    def ac_geom3d_shelf_cabinet(bottomhight):
         global shelf_objects
         
+        
         wallthickness = 20
+        
+        
+        
         rs.CurrentLayer(layer_geom3d)
         
         
@@ -314,8 +318,9 @@ def ac_furniture():
                 base = base - wallthickness
             
             sw_pt1 = (base,0,0)
-            #sw_pt2 = (base, furniture_depth, 0)
-            #plane = rs.WorldXYPlane()
+            
+            #Sidewall
+            
             sw = rs.AddRectangle(sw_pt1, wallthickness,  furniture_depth)
             
             sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthickness)))
@@ -326,12 +331,26 @@ def ac_furniture():
         
         def ac_geom3d_shelf_cabinet_inside():
             
+            #bottom 
+            #attention 50 is hardocded value for bottom standing furniture!
             
-            base = (wallthickness, wallthickness, 50)
+            if bottomhight == 50:
+                base = (wallthickness, wallthickness, bottomhight)
+                basetarget = (wallthickness,wallthickness,0)
+                
+                shelf_depth = furniture_depth - 2 * wallthickness
+                
+                
+            else:
+                base = (wallthickness, 0, bottomhight)
+                basetarget = (wallthickness, 0,0)
+                
+                shelf_depth = furniture_depth - 1 * wallthickness
+            
             shelf_width = furniture_width - 2 * wallthickness
-            shelf_depth = furniture_depth - 2 * wallthickness
+            #shelf_depth = furniture_depth - 2 * wallthickness
             bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
-            bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, (wallthickness,wallthickness,0))
+            bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, basetarget)
             rs.CapPlanarHoles(bottom_shelf)
             
             #Add material to obj
@@ -341,8 +360,8 @@ def ac_furniture():
                 shelf_distance = 350 + wallthickness
                 shelf_count = furniture_hight / shelf_distance
                 
-                #start posistion -> 50 for distance between bottom shelf
-                shelf_position = shelf_distance + 50
+                #start posistion -> 50=bottomhight for distance between bottom shelf
+                shelf_position = shelf_distance + bottomhight
                 
                 print "shelf Count"
                 print shelf_count
@@ -422,15 +441,26 @@ def ac_furniture():
         wallthickness = 20
         door_width = furniture_width / 2 - wallthickness
         
+        #adjust door extrusion start point do avoid gaps
+        if furniture_typ == 1:
+            overlapping_door = 50 - 20
+        else:
+            overlapping_door = 50 - 30
+        
+        
+        
         
         def ac_geom3d_wing_door_itself(base):
             rotate = "flase"
+            
+            
+            
             base_ogirinal = base
             if base > 0:
                 base = base / 2 - wallthickness
                 rotate = "true"
             
-            wdpt = (base + wallthickness, 0, 30)
+            wdpt = (base + wallthickness, 0, overlapping_door)
             wdtarget_hight = (furniture_hight - wallthickness)
             wdtarget = (base + wallthickness,0,wdtarget_hight)
             door1 = rs.AddRectangle(wdpt, door_width, wallthickness)
@@ -473,6 +503,8 @@ def ac_furniture():
             print len(obj2d_function)
             #obj2d_function.append(opening_projection1)
             
+        
+        
         ac_geom3d_wing_door_itself(0)
         ac_geom3d_wing_door_itself(furniture_width)
         
@@ -556,12 +588,12 @@ def ac_furniture():
     ##FUNCTION DEFINITIONS END###
     #############################
     
-    #lock all existing layers
     
     
     
     
-    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk", 5, 0, 5 )
+    
+    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=upright section[filling cabinet]", 5, 0, 6 )
     print furniture_typ
     
     #Get Furniture Dimensions and Scale them to mm
@@ -580,6 +612,7 @@ def ac_furniture():
         furniture_hight = 800
         furniture_hight_cm = furniture_hight / 10
         
+        
     else:
         furniture_hight = rs.GetReal("Hight of furniture [cm]", 80, 0)
         #print("Test")
@@ -592,25 +625,33 @@ def ac_furniture():
     
     ac_branding()
 
-    #Add text to textvariable
+    #Add text to textvariable and execute main functions
+    
+    #fillin cabinet
     if furniture_typ == 1:
         #filling cabinet furniture like shelf with wing doors
         furniture_name = "filling cabinet"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
-        ac_geom3d_shelf_cabinet()
+        ac_geom3d_shelf_cabinet(50)
         ac_geom3d_wing_door()
-        
+    
+    #filling cabinet uprigth Section
+    elif furniture_typ == 6:
+        furniture_name = "filling cabinet UP"
+        ac_geom2d_functionarea(furniture_width, furniture_depth)
+        ac_geom3d_shelf_cabinet(20)
+        ac_geom3d_wing_door()
         
     elif furniture_typ == 2:
         furniture_name = "Shelf"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
-        ac_geom3d_shelf_cabinet()
+        ac_geom3d_shelf_cabinet(50)
     
     elif furniture_typ == 3:
         #sideboard shelf with sliding door
         furniture_name = "Sideboard"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
-        ac_geom3d_shelf_cabinet()
+        ac_geom3d_shelf_cabinet(50)
         ac_geom3d_sideboard_door()
     
     elif furniture_typ == 4:
