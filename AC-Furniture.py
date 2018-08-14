@@ -300,7 +300,7 @@ def ac_furniture():
     def ac_geom3d_shelf_cabinet():
         global shelf_objects
         
-        wallthicknesss = 20
+        wallthickness = 20
         rs.CurrentLayer(layer_geom3d)
         
         
@@ -311,14 +311,14 @@ def ac_furniture():
             global sw
             
             if base > 0:
-                base = base - wallthicknesss
+                base = base - wallthickness
             
             sw_pt1 = (base,0,0)
             #sw_pt2 = (base, furniture_depth, 0)
             #plane = rs.WorldXYPlane()
-            sw = rs.AddRectangle(sw_pt1, wallthicknesss,  furniture_depth)
+            sw = rs.AddRectangle(sw_pt1, wallthickness,  furniture_depth)
             
-            sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
+            sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthickness)))
             rs.CapPlanarHoles(sw)
             
             #add material 
@@ -327,18 +327,18 @@ def ac_furniture():
         def ac_geom3d_shelf_cabinet_inside():
             
             
-            base = (wallthicknesss, wallthicknesss, 50)
-            shelf_width = furniture_width - 2 * wallthicknesss
-            shelf_depth = furniture_depth - 2 * wallthicknesss
+            base = (wallthickness, wallthickness, 50)
+            shelf_width = furniture_width - 2 * wallthickness
+            shelf_depth = furniture_depth - 2 * wallthickness
             bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
-            bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, (wallthicknesss,wallthicknesss,0))
+            bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, (wallthickness,wallthickness,0))
             rs.CapPlanarHoles(bottom_shelf)
             
             #Add material to obj
             ac_material_surface(bottom_shelf, "srf")
             
             if furniture_hight >= 700:
-                shelf_distance = 350 + wallthicknesss
+                shelf_distance = 350 + wallthickness
                 shelf_count = furniture_hight / shelf_distance
                 
                 #start posistion -> 50 for distance between bottom shelf
@@ -355,13 +355,13 @@ def ac_furniture():
                 loopbreaker = 0
                 while loopbreaker < shelf_count:
                     
-                    base = (wallthicknesss, wallthicknesss, shelf_position)
+                    base = (wallthickness, wallthickness, shelf_position)
                     
                     shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
                     
                     
                     #
-                    base_extrude_target = (wallthicknesss, wallthicknesss, (shelf_position + wallthicknesss))
+                    base_extrude_target = (wallthickness, wallthickness, (shelf_position + wallthickness))
                     shelf = rs.ExtrudeCurveStraight(shelf, base, base_extrude_target)
                     
                     rs.CapPlanarHoles(shelf)
@@ -377,11 +377,11 @@ def ac_furniture():
                     ac_material_surface(shelf, "srf")
         
         #back wall
-        bw_pt = (wallthicknesss, furniture_depth, 0)
-        bw_width = furniture_width - 2* wallthicknesss
+        bw_pt = (wallthickness, furniture_depth, 0)
+        bw_width = furniture_width - 2* wallthickness
                 
-        bw =rs.AddRectangle(bw_pt, bw_width, (wallthicknesss * -1))
-        bw = rs.ExtrudeCurveStraight(bw, (0,0,0), (0,0,(furniture_hight- wallthicknesss)))
+        bw =rs.AddRectangle(bw_pt, bw_width, (wallthickness * -1))
+        bw = rs.ExtrudeCurveStraight(bw, (0,0,0), (0,0,(furniture_hight- wallthickness)))
         rs.CapPlanarHoles(bw)
         
         #add material to object back
@@ -389,7 +389,7 @@ def ac_furniture():
 
         
         #top
-        tw_pt = (0,0,(furniture_hight- wallthicknesss))
+        tw_pt = (0,0,(furniture_hight- wallthickness))
         tw_pt_target = (0,0, furniture_hight)
         tw = rs.AddRectangle(tw_pt, furniture_width, furniture_depth)
         tw = rs.ExtrudeCurveStraight(tw, tw_pt, tw_pt_target)
@@ -419,26 +419,26 @@ def ac_furniture():
     def ac_geom3d_wing_door():
         
         
-        wallthicknesss = 20
-        door_width = furniture_width / 2 - wallthicknesss
+        wallthickness = 20
+        door_width = furniture_width / 2 - wallthickness
         
         
         def ac_geom3d_wing_door_itself(base):
             rotate = "flase"
             base_ogirinal = base
             if base > 0:
-                base = base / 2 - wallthicknesss
+                base = base / 2 - wallthickness
                 rotate = "true"
             
-            wdpt = (base + wallthicknesss, 0, 30)
-            wdtarget_hight = (furniture_hight - wallthicknesss)
-            wdtarget = (base + wallthicknesss,0,wdtarget_hight)
-            door1 = rs.AddRectangle(wdpt, door_width, wallthicknesss)
+            wdpt = (base + wallthickness, 0, 30)
+            wdtarget_hight = (furniture_hight - wallthickness)
+            wdtarget = (base + wallthickness,0,wdtarget_hight)
+            door1 = rs.AddRectangle(wdpt, door_width, wallthickness)
             door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
             
             
             if rotate == "true":
-                wdp2 = (base_ogirinal - wallthicknesss, 0, 30)
+                wdp2 = (base_ogirinal - wallthickness, 0, 30)
                 rs.RotateObject(door1,wdp2,30,None, copy=False)
             
             
@@ -454,18 +454,18 @@ def ac_furniture():
             rs.CurrentLayer(layer_functionarea)
             start_y_distance = (-1 * furniture_depth)
             startpt = ((furniture_width / 2), 0 ,0)
-            endpt = (wallthicknesss,start_y_distance,0)
+            endpt = (wallthickness,start_y_distance,0)
             
             point_on_arc_x = (furniture_width / 2) * +0.90
             point_on_arc_y = furniture_depth * -0.33
             point_on_arc = (point_on_arc_x, point_on_arc_y, 0)
             
-            line =rs.AddLine(endpt, (wallthicknesss,0,0))
+            line =rs.AddLine(endpt, (wallthickness,0,0))
             
             arc = rs.AddArc3Pt(endpt, startpt,point_on_arc)
             opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
             
-            opening_projection2 = rs.MirrorObject(opening_projection1, ((furniture_width /2),0,0), ((furniture_width /2),wallthicknesss,0),copy=True)
+            opening_projection2 = rs.MirrorObject(opening_projection1, ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
             
             
             obj2d_function = [opening_projection2,opening_projection1]
@@ -499,7 +499,30 @@ def ac_furniture():
             print "loop"
             print loopbreaker
 
-
+    def ac_geom3d_sideboard_door():
+        wallthickness = 20
+        wallthickness = wallthickness / 2
+        base = furniture_width / 2 - wallthickness
+        
+        wdpt = (wallthickness, 0, 30)
+        wdtarget_hight = (furniture_hight - wallthickness - wallthickness / 2)
+        wdtarget = (wallthickness,0,wdtarget_hight)
+        door1 = rs.AddRectangle(wdpt, base, wallthickness)
+        door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
+        rs.CapPlanarHoles(door1)
+        
+        base2 = furniture_width / 2
+        wdpt2 = (base2, wallthickness, 30 )
+        wdpt2_target = (base2, wallthickness, wdtarget_hight )
+        width_slided_door = furniture_width / 4
+        door2 = rs.AddRectangle(wdpt2, width_slided_door, wallthickness)
+        door2 = rs.ExtrudeCurveStraight(door2, wdpt2, wdpt2_target)
+        rs.CapPlanarHoles(door2)
+        
+        #add material to objects
+        ac_material_surface(door1, "srf")
+        ac_material_surface(door2, "srf")
+        
 
     def ac_branding():
         global branding
@@ -588,6 +611,7 @@ def ac_furniture():
         furniture_name = "Sideboard"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
         ac_geom3d_shelf_cabinet()
+        ac_geom3d_sideboard_door()
     
     elif furniture_typ == 4:
         furniture_name = "Table"
