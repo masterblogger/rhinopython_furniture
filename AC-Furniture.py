@@ -121,6 +121,18 @@ def ac_furniture():
         elif furniture_typ == 5:
             textdottext = (furniture_name + "\n" 
             + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
+        elif furniture_typ == 9:
+            
+            if furniture_width_cm <= 120:
+                sittings = 1
+                people = " Seat"
+            else:
+                sittings = furniture_width_cm // 60
+                people = " Seats"
+            
+            textdottext = (furniture_name + "\n" 
+            + str(furniture_width_cm)+ " x " + str(furniture_depth_cm) + "\n" + str(sittings)+ people)
+            
         
         else:
             
@@ -139,7 +151,7 @@ def ac_furniture():
             
 
         
-        #rs.AddPoint(geom2d_centroid[0])
+        
         rs.CurrentLayer(layer_text)
         geom_text = rs.AddTextDot(textdottext, geom2d_centroid[0])
         #rhino.text
@@ -629,8 +641,8 @@ def ac_furniture():
             geom_2d_sideboard_arrow_arrow(100, 0)
             geom_2d_sideboard_arrow_arrow(150, 1)
             
-            print "XXXXXXXXXXXXXXXXXXXXXX"
-            print len(obj2d_function)
+            
+            
             
             
             rs.LayerLocked(layer_geom2d, locked = True)
@@ -666,6 +678,63 @@ def ac_furniture():
         print "indexmateri"
         print index_material
         
+    def ac_geom_2d_sofa():
+        global geom_functionarea, geom_workarea, obj2d_function
+        
+        width_armrest = 100
+        armrest_height = 600
+        seating_height = 400
+        backrest_height = 800
+        
+        base_armrest2x = furniture_width - width_armrest
+        base_backresty = furniture_depth - width_armrest
+        seating_width = furniture_width - 2 * width_armrest
+        seating_depth = furniture_depth - width_armrest
+        
+        rs.CurrentLayer(layer_geom2d)
+        
+        base_armrest1 = (0,0,0)
+        target_armrest1 = (0,0,armrest_height)
+        
+        base_seating = (width_armrest, 0,0)
+        target_seating = (width_armrest, 0, seating_height)
+        
+        base_armrest2 = (base_armrest2x,0,0)
+        target_armrest2 = (base_armrest2x,0,armrest_height)
+        
+        base_backrest = (width_armrest, base_backresty, 0)
+        target_backrest = (width_armrest, base_backresty, backrest_height)
+        
+        armrest1_2d = rs.AddRectangle(base_armrest1, width_armrest,furniture_depth)
+        armrest2_2d = rs.AddRectangle(base_armrest2, width_armrest,furniture_depth)
+        seating_2d = rs.AddRectangle(base_seating, seating_width, seating_depth)
+        backrest_2d = rs.AddRectangle(base_backrest, seating_width, width_armrest)
+        obj2d_function = [armrest1_2d, armrest2_2d, seating_2d, backrest_2d]
+        
+        
+        armrest1_3d = rs.ExtrudeCurveStraight(armrest1_2d,base_armrest1,target_armrest1)
+        armrest2_3d = rs.ExtrudeCurveStraight(armrest2_2d,base_armrest2,target_armrest2)
+        seating_3d = rs.ExtrudeCurveStraight(seating_2d,base_seating,target_seating)
+        backrest_3d = rs.ExtrudeCurveStraight(backrest_2d,base_backrest,target_backrest)
+        
+        rs.CapPlanarHoles(armrest2_3d)
+        rs.CapPlanarHoles(armrest1_3d)
+        rs.CapPlanarHoles(seating_3d)
+        rs.CapPlanarHoles(backrest_3d)
+        
+
+        
+        ac_material_surface(armrest1_3d, "leg")
+        ac_material_surface(armrest2_3d, "leg")
+        ac_material_surface(seating_3d, "leg")
+        ac_material_surface(backrest_3d, "leg")
+        
+        #some stuff 
+        geom2d = backrest_2d
+        geom_workarea = geom2d
+        geom_functionarea = geom2d
+        
+        
     #############################
     ##FUNCTION DEFINITIONS END###
     #############################
@@ -675,7 +744,7 @@ def ac_furniture():
     
     
     print "UP = Uprigth Section"
-    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP]", 5, 0, 8 )
+    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP]", 5, 0, 9 )
     print furniture_typ
     
     #Get Furniture Dimensions and Scale them to mm
@@ -768,6 +837,12 @@ def ac_furniture():
         
         rs.AddLayer(layer_text, layer_text_color, parent=layer_furniture)
         ac_geom2d_workarea(furniture_width)
+    
+    elif furniture_typ == 9:
+        furniture_name = "Sofa"
+        ac_geom_2d_sofa()
+    
+    
     #elif furniture_typ == 3:
     #    furniture_name = "XXX"
     
