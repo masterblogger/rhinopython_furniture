@@ -133,6 +133,20 @@ def ac_furniture():
             textdottext = (furniture_name + "\n" 
             + str(furniture_width_cm)+ " x " + str(furniture_depth_cm) + "\n" + str(sittings)+ people)
             
+        elif furniture_typ == 10:
+            
+            
+            if furniture_width_cm <= 120:
+                divan_bed = "1" 
+                people = " person bed"
+            else:
+                divan_bed = "2" 
+                people = " persons bed"
+                
+            
+            textdottext = (furniture_name + "\n"
+            + str(furniture_width_cm)+ " x " + str(furniture_depth_cm) + "\n" + str(divan_bed)+ people)
+        
         
         else:
             
@@ -712,6 +726,8 @@ def ac_furniture():
         obj2d_function = [armrest1_2d, armrest2_2d, seating_2d, backrest_2d]
         
         
+        rs.CurrentLayer(layer_geom3d)
+        
         armrest1_3d = rs.ExtrudeCurveStraight(armrest1_2d,base_armrest1,target_armrest1)
         armrest2_3d = rs.ExtrudeCurveStraight(armrest2_2d,base_armrest2,target_armrest2)
         seating_3d = rs.ExtrudeCurveStraight(seating_2d,base_seating,target_seating)
@@ -729,8 +745,102 @@ def ac_furniture():
         ac_material_surface(seating_3d, "leg")
         ac_material_surface(backrest_3d, "leg")
         
-        #some stuff 
+        #some stuff should be removed in future...
         geom2d = backrest_2d
+        geom_workarea = geom2d
+        geom_functionarea = geom2d
+        
+    def ac_geom_bed():
+        global geom_functionarea, geom_workarea, obj2d_function
+
+        bedheight = 250
+        legdist = 50
+        legs3d = []
+        bedthickness = 150
+        pillow_height = 150
+        
+        #decision between normal bed and hospital bed
+        if furniture_hight >= 800:
+            #hospital
+            leg_dim = 50
+            bedheight = 700
+            
+        else:
+            #default bed
+            leg_dim = 70
+            bedheight = 250
+        
+        basebed = (0,0, bedheight)
+        targetheight = bedthickness + bedheight
+        targetbed = (0,0,targetheight)
+        
+        
+        #legs
+        pt23x = furniture_width - legdist
+        pt34y = furniture_depth - legdist
+        
+        
+        basept1 = (legdist,legdist,0)
+        targetpt1 = (legdist,legdist,bedheight)
+        
+        basept2 = (pt23x,legdist,0)
+        targetpt2 = (pt23x,legdist,bedheight)
+        
+        basept3 = (pt23x, pt34y, 0)
+        targetpt3 = (pt23x, pt34y, bedheight)
+        
+        basept4 =(legdist,pt34y, 0)
+        targetpt4 = (legdist,pt34y,bedheight)
+        
+        #pillow
+        pillow_width = -furniture_width *0.20
+        pillow_depth = furniture_depth - legdist - leg_dim
+        targetpillow_z = pillow_height + targetheight
+        
+        pillowy = legdist
+        basepillow = (pt23x, pillowy, targetheight)
+        targetpillow = (pt23x, pillowy, targetpillow_z)
+        
+        geom2d_leg_pts = [basept1, basept2, basept3, basept4]
+        geom2d_leg_target_pts = [targetpt1, targetpt2, targetpt3, targetpt4]
+        
+        #loopbreaker = 0
+        #while loopbreaker < len(lengeom2d_leg_pts):
+        
+        rs.CurrentLayer(layer_geom2d)
+        leg1 = rs.AddRectangle(basept1, leg_dim, leg_dim)
+        leg2 = rs.AddRectangle(basept2, -leg_dim, leg_dim)
+        leg3 = rs.AddRectangle(basept3, -leg_dim, -leg_dim)
+        leg4 = rs.AddRectangle(basept4, leg_dim, -leg_dim)
+        
+        pillow_2d = rs.AddRectangle(basepillow, pillow_width, pillow_depth)
+        pillow_3d = rs.ExtrudeCurveStraight(pillow_2d, basepillow, targetpillow)
+        rs.DeleteObject(pillow_2d)
+        rs.CapPlanarHoles(pillow_3d)
+        
+        obj2d_function = [leg1, leg2, leg3, leg4]
+        
+        
+        
+        #3d geom creation
+        rs.CurrentLayer(layer_geom3d)
+        loop = 0
+        while loop < len(obj2d_function):
+            leg3d = rs.ExtrudeCurveStraight(obj2d_function[loop],geom2d_leg_pts[loop],geom2d_leg_target_pts[loop])
+            legs3d.append(leg3d)
+            
+            loop = loop + 1
+        print "leng of leg33d"
+        print len(legs3d)
+        
+        bed_2d =rs.AddRectangle(basebed,furniture_width,furniture_depth)
+        bed_3d = rs.ExtrudeCurveStraight(bed_2d, basebed, targetbed)
+        rs.DeleteObject(bed_2d)
+        rs.CapPlanarHoles(bed_3d)
+        
+        
+        #some stuff should be removed in future..
+        geom2d = leg1
         geom_workarea = geom2d
         geom_functionarea = geom2d
         
@@ -744,7 +854,7 @@ def ac_furniture():
     
     
     print "UP = Uprigth Section"
-    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP]", 5, 0, 9 )
+    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa]", 5, 0, 10 )
     print furniture_typ
     
     #Get Furniture Dimensions and Scale them to mm
@@ -842,6 +952,14 @@ def ac_furniture():
         furniture_name = "Sofa"
         ac_geom_2d_sofa()
     
+    
+    elif furniture_typ == 10:
+        if furniture_hight < 800:
+            furniture_name = "bed"
+        else:
+            furniture_name = "divan bed"
+        
+        ac_geom_bed()
     
     #elif furniture_typ == 3:
     #    furniture_name = "XXX"
