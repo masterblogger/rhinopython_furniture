@@ -532,19 +532,29 @@ def ac_furniture():
             print loopbreaker
 
     def ac_geom3d_sideboard_door():
+        
+        
+        if furniture_typ == 3:
+            overlapping_door = 50 - 20 
+            correctvalue = 10
+        else:
+            overlapping_door = 50 - 30
+            correctvalue = 0
+        
         wallthickness = 20
         wallthickness = wallthickness / 2
         base = furniture_width / 2 - wallthickness
         
-        wdpt = (wallthickness, 0, 30)
-        wdtarget_hight = (furniture_hight - wallthickness - wallthickness / 2)
+        wdpt = (wallthickness, 0, overlapping_door)
+        wdtarget_hight = (furniture_hight - overlapping_door + correctvalue)
         wdtarget = (wallthickness,0,wdtarget_hight)
         door1 = rs.AddRectangle(wdpt, base, wallthickness)
         door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
+        
         rs.CapPlanarHoles(door1)
         
         base2 = furniture_width / 2
-        wdpt2 = (base2, wallthickness, 30 )
+        wdpt2 = (base2, wallthickness, overlapping_door )
         wdpt2_target = (base2, wallthickness, wdtarget_hight )
         width_slided_door = furniture_width / 4
         door2 = rs.AddRectangle(wdpt2, width_slided_door, wallthickness)
@@ -554,6 +564,77 @@ def ac_furniture():
         #add material to objects
         ac_material_surface(door1, "srf")
         ac_material_surface(door2, "srf")
+        
+        
+        def ac_geom_2d_sideboard_arrow():
+            
+            
+            wallthickness = 20
+            #arrow_distance = 100
+            arrow_width = 25
+            
+            rs.LayerLocked(layer_geom2d, locked = False)
+            rs.CurrentLayer(layer_geom2d)
+            
+            
+            
+            def geom_2d_sideboard_arrow_arrow(arrow_distance, mirror):
+                global obj2d_function, opening_projection3, opening_projection4
+                
+                
+                
+                
+                #upper point
+                arrow_pt1y = -arrow_distance + arrow_width
+                arrow_pt1 = (150, arrow_pt1y, 0)
+            
+                #lower point
+                arrow_pt2y = -arrow_distance - arrow_width
+                arrow_pt2 = (150, arrow_pt2y, 0)
+            
+                #arrow point
+                arrow_pt3 = (80, -arrow_distance, 0)
+            
+                opening_projection1 = rs.AddPolyline((arrow_pt1, arrow_pt2, arrow_pt3, arrow_pt1))
+            
+            
+                arrowline_pt1 = (150, -arrow_distance, 0)
+                arrowline_pt2x = furniture_width * 0.7
+                arrowline_pt2 = (arrowline_pt2x, -arrow_distance, 0)
+                opening_projection2 = rs.AddLine(arrowline_pt1, arrowline_pt2)
+                
+                arrow = (opening_projection1, opening_projection2)
+                
+                #mirror for 2nd run 1 = true
+                if mirror == 1:
+                    mirrorpt_width = furniture_width / 2
+                    mirror_pt1 = (mirrorpt_width, 0, 0)
+                    mirror_pt2 = (mirrorpt_width, 100, 0)
+                    arrow2 = rs.MirrorObject(arrow, mirror_pt1, mirror_pt2, copy=False)
+                    
+                    opening_projection1 = opening_projection1
+                    opening_projection2 = opening_projection2
+                    
+                    obj2d_function = [opening_projection1, opening_projection2, opening_projection3, opening_projection4]
+                    
+                    print "XXXXXXXXXXXXXXXXXXXXXX"
+                    print len(obj2d_function)
+                else:
+                    arrow1 = (opening_projection1, opening_projection2)
+                    opening_projection3 = opening_projection1
+                    opening_projection4 = opening_projection2
+                    
+            
+            geom_2d_sideboard_arrow_arrow(100, 0)
+            geom_2d_sideboard_arrow_arrow(150, 1)
+            
+            print "XXXXXXXXXXXXXXXXXXXXXX"
+            print len(obj2d_function)
+            
+            
+            rs.LayerLocked(layer_geom2d, locked = True)
+            
+        ac_geom_2d_sideboard_arrow()
         
 
     def ac_branding():
@@ -592,8 +673,8 @@ def ac_furniture():
     
     
     
-    
-    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=upright section[filling cabinet]", 5, 0, 6 )
+    print "UP = Uprigth Section"
+    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP]", 5, 0, 7 )
     print furniture_typ
     
     #Get Furniture Dimensions and Scale them to mm
@@ -647,13 +728,27 @@ def ac_furniture():
         ac_geom2d_functionarea(furniture_width, furniture_depth)
         ac_geom3d_shelf_cabinet(50)
     
+    #
+    #Sideboards normal & Upright Sections
+    #
     elif furniture_typ == 3:
         #sideboard shelf with sliding door
         furniture_name = "Sideboard"
         ac_geom2d_functionarea(furniture_width, furniture_depth)
+        
+        
         ac_geom3d_shelf_cabinet(50)
         ac_geom3d_sideboard_door()
-    
+        
+    elif furniture_typ == 7:
+        #sideboard shelf with sliding door
+        furniture_name = "Sideboard UP"
+        ac_geom2d_functionarea(furniture_width, furniture_depth)
+        ac_geom3d_shelf_cabinet(20)
+        ac_geom3d_sideboard_door()
+
+
+
     elif furniture_typ == 4:
         furniture_name = "Table"
         
