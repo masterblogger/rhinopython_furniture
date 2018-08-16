@@ -802,7 +802,7 @@ def ac_furniture():
         pillowy = legdist
         basepillow = (pt23x, pillowy, targetheight)
         targetpillow = (pt23x, pillowy, targetpillow_z)
-        
+            
         geom2d_leg_pts = [basept1, basept2, basept3, basept4]
         geom2d_leg_target_pts = [targetpt1, targetpt2, targetpt3, targetpt4]
         
