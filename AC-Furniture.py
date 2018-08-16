@@ -526,9 +526,9 @@ def ac_furniture():
             
             
             obj2d_function = [opening_projection2,opening_projection1]
-            print "XXXXXXXXX"
-            print len(obj2d_function)
-            #obj2d_function.append(opening_projection1)
+            
+            
+            
             
         
         
@@ -644,8 +644,8 @@ def ac_furniture():
                     
                     obj2d_function = [opening_projection1, opening_projection2, opening_projection3, opening_projection4]
                     
-                    print "XXXXXXXXXXXXXXXXXXXXXX"
-                    print len(obj2d_function)
+                    
+                    
                 else:
                     arrow1 = (opening_projection1, opening_projection2)
                     opening_projection3 = opening_projection1
@@ -679,13 +679,15 @@ def ac_furniture():
             material_color = (255,245, 215)
         elif element == "leg":
             material_color = (230,230,230)
-        
+        elif element == "textile":
+            material_color = (255,255,255)
         
         index_material = rs.AddMaterialToObject(mat2obj)
         
         mcolor = rs.MaterialColor(index_material, material_color) #ahorn
         print "mcolor:"
         print mcolor
+
 
         rs.MaterialName(index_material, "Furniture_Surface")
     
@@ -813,6 +815,7 @@ def ac_furniture():
         leg3 = rs.AddRectangle(basept3, -leg_dim, -leg_dim)
         leg4 = rs.AddRectangle(basept4, leg_dim, -leg_dim)
         
+        rs.CurrentLayer(layer_geom3d)
         pillow_2d = rs.AddRectangle(basepillow, pillow_width, pillow_depth)
         pillow_3d = rs.ExtrudeCurveStraight(pillow_2d, basepillow, targetpillow)
         rs.DeleteObject(pillow_2d)
@@ -823,11 +826,12 @@ def ac_furniture():
         
         
         #3d geom creation
-        rs.CurrentLayer(layer_geom3d)
+        
         loop = 0
         while loop < len(obj2d_function):
             leg3d = rs.ExtrudeCurveStraight(obj2d_function[loop],geom2d_leg_pts[loop],geom2d_leg_target_pts[loop])
             legs3d.append(leg3d)
+            ac_material_surface(leg3d, "leg")
             
             loop = loop + 1
         print "leng of leg33d"
@@ -837,6 +841,15 @@ def ac_furniture():
         bed_3d = rs.ExtrudeCurveStraight(bed_2d, basebed, targetbed)
         rs.DeleteObject(bed_2d)
         rs.CapPlanarHoles(bed_3d)
+        
+        
+        #color
+        ac_material_surface(pillow_3d, "textile")
+        ac_material_surface(bed_3d, "textile")
+        #ac_material_surface(leg1, "leg")
+        #ac_material_surface(leg2, "leg")
+        #ac_material_surface(leg3, "leg")
+        #ac_material_surface(leg4, "leg")
         
         
         #some stuff should be removed in future..
