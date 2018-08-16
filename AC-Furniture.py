@@ -333,19 +333,20 @@ def ac_furniture():
             
             #bottom 
             #attention 50 is hardocded value for bottom standing furniture!
+            shelf_depth = furniture_depth - 2 * wallthickness
             
             if bottomhight == 50:
                 base = (wallthickness, wallthickness, bottomhight)
                 basetarget = (wallthickness,wallthickness,0)
                 
-                shelf_depth = furniture_depth - 2 * wallthickness
+                #shelf_depth = furniture_depth - 2 * wallthickness
                 
                 
             else:
                 base = (wallthickness, 0, bottomhight)
                 basetarget = (wallthickness, 0,0)
                 
-                shelf_depth = furniture_depth - 1 * wallthickness
+                #shelf_depth = furniture_depth - 2 * wallthickness
             
             shelf_width = furniture_width - 2 * wallthickness
             #shelf_depth = furniture_depth - 2 * wallthickness
@@ -674,7 +675,7 @@ def ac_furniture():
     
     
     print "UP = Uprigth Section"
-    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP]", 5, 0, 7 )
+    furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP]", 5, 0, 8 )
     print furniture_typ
     
     #Get Furniture Dimensions and Scale them to mm
@@ -728,6 +729,10 @@ def ac_furniture():
         ac_geom2d_functionarea(furniture_width, furniture_depth)
         ac_geom3d_shelf_cabinet(50)
     
+    elif furniture_typ == 8:
+        furniture_name = "Shelf UP"
+        ac_geom2d_functionarea(furniture_width, furniture_depth)
+        ac_geom3d_shelf_cabinet(20)
     #
     #Sideboards normal & Upright Sections
     #
