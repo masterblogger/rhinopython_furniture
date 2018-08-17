@@ -28,9 +28,10 @@ def RunCommand( is_interactive ):
     # look here: https://developer.rhino3d.com/guides/rhinopython/creating-rhino-commands-using-python/
  
 
-    #import rhinoscriptsyntax as rs
-    #import Rhino as rhino
+    
+    
 
+    
     
     
     
@@ -123,19 +124,37 @@ def RunCommand( is_interactive ):
             geom2d = rs.AddRectangle(planexy, width, depth)
             
             
+
+            
             
             geom2d_centroid = rs.CurveAreaCentroid(geom2d)
             
-            basepoint = geom2d_centroid[1]
-            #rs.AddPoint((geom2d_centroid))
+            if furniture_typ == 11:
+                rs.DeleteObject(geom2d)
+                del geom2d
             
+            
+            basepoint = geom2d_centroid[1]
+            
+            ac_text(geom2d_centroid)
+        
+        def ac_text(geom2d_centroid):
+            global geom_text, blockname
             #info text
+            
+            #tables
             if furniture_typ == 4:
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
             elif furniture_typ == 5:
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
+            elif furniture_typ == 11:
+                textdottext = (furniture_name + "\n" 
+                + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
+            
+            
+            #bed and sofa
             elif furniture_typ == 9:
                 
                 if furniture_width_cm <= 120:
@@ -183,7 +202,7 @@ def RunCommand( is_interactive ):
             
             rs.CurrentLayer(layer_text)
             geom_text = rs.AddTextDot(textdottext, geom2d_centroid[0])
-            #rhino.text
+            
             #Generate Blockname
             blockname = (str(furniture_name) + str(furniture_width_cm) + "x" + str(furniture_depth_cm))
             
@@ -283,42 +302,6 @@ def RunCommand( is_interactive ):
             thickness_elements = 50
             
             rs.CurrentLayer(layer_geom3d)
-    
-            
-            def ac_geom3d_desk_foot(base):
-                
-                if base > 0:
-                    base = base - thickness_elements
-                #first 2d bow base for extrusion 
-                arc_start_pt = (base,furniture_depth,0)
-                arc_end_pt = (base, furniture_depth-thickness_elements, thickness_elements)
-                arc_pt_on_arc = (base, furniture_depth - thickness_elements*0.34,thickness_elements*0.66)
-                arc_1 = rs.AddArc3Pt(arc_start_pt,arc_end_pt,arc_pt_on_arc)
-            
-                #second 2d bow base for extrusion 
-                arc_start_pt2 = (base,0,0)
-                arc_end_pt2 = (base, thickness_elements, thickness_elements)
-                arc_pt_on_arc2 = (base, thickness_elements*0.34, thickness_elements*0.66)
-                arc_2 = rs.AddArc3Pt(arc_start_pt2,arc_end_pt2,arc_pt_on_arc2)
-            
-                line_1 = rs.AddLine(arc_end_pt,arc_end_pt2)
-                line_2 = rs.AddLine(arc_start_pt,arc_start_pt2)
-            
-                foot_extrude_base = rs.JoinCurves([arc_1, arc_2, line_1, line_2], delete_input=True)
-                foot_extruded = rs.ExtrudeCurveStraight(foot_extrude_base, (base,0,0),(base+thickness_elements,0,0))
-                foot_extruded = rs.CapPlanarHoles(foot_extruded)
-                
-                #add cylinder
-                base = (base + thickness_elements/2, furniture_depth/2, thickness_elements)
-                hight = furniture_hight - thickness_elements
-                radius = thickness_elements / 2 
-                cylinderfoot =rs.AddCylinder(base, hight, radius, cap=True)
-                
-                #add material to elements
-                ac_material_surface(cylinderfoot, "leg")
-                
-            ac_geom3d_desk_foot(0)
-            ac_geom3d_desk_foot(furniture_width)
             
             #Add table plate
             plane_rectangle_pt = (0, 0, furniture_hight)
@@ -327,7 +310,8 @@ def RunCommand( is_interactive ):
             
             rs.CapPlanarHoles(table_table)
             
-            
+            ac_geom3d_desk_foot(0,furniture_depth)
+            ac_geom3d_desk_foot(furniture_width,furniture_depth)
             
             #Add Material Color
             ac_material_surface(table_table, "srf")
@@ -336,6 +320,52 @@ def RunCommand( is_interactive ):
             #add polysurfaces objects to group
             obj = rs.ObjectsByType(16, select=False, state = 0)
             rs.AddObjectsToGroup(obj,group3d)
+            
+            
+        def ac_geom3d_desk_foot(base,depth_foot):
+            global foot_elements
+            
+            thickness_elements = 50
+            
+            if base > 0:
+                base = base - thickness_elements
+            #first 2d bow base for extrusion 
+            arc_start_pt = (base,depth_foot,0)
+            arc_end_pt = (base, depth_foot-thickness_elements, thickness_elements)
+            arc_pt_on_arc = (base, depth_foot - thickness_elements*0.34,thickness_elements*0.66)
+            arc_1 = rs.AddArc3Pt(arc_start_pt,arc_end_pt,arc_pt_on_arc)
+        
+            #second 2d bow base for extrusion 
+            arc_start_pt2 = (base,0,0)
+            arc_end_pt2 = (base, thickness_elements, thickness_elements)
+            arc_pt_on_arc2 = (base, thickness_elements*0.34, thickness_elements*0.66)
+            arc_2 = rs.AddArc3Pt(arc_start_pt2,arc_end_pt2,arc_pt_on_arc2)
+        
+            line_1 = rs.AddLine(arc_end_pt,arc_end_pt2)
+            line_2 = rs.AddLine(arc_start_pt,arc_start_pt2)
+            
+            rs.CurrentLayer(layer_geom3d)
+            foot_extrude_base = rs.JoinCurves([arc_1, arc_2, line_1, line_2], delete_input=True)
+            foot_extruded = rs.ExtrudeCurveStraight(foot_extrude_base, (base,0,0),(base+thickness_elements,0,0))
+            rs.CapPlanarHoles(foot_extruded)
+            
+            #add cylinder
+            base = (base + thickness_elements/2, depth_foot/2, thickness_elements)
+            hight = furniture_hight - thickness_elements
+            radius = thickness_elements / 2 
+            cylinderfoot =rs.AddCylinder(base, hight, radius, cap=True)
+            
+            
+            
+            #add material to elements
+            ac_material_surface(cylinderfoot, "leg")
+            ac_material_surface(foot_extruded, "leg")
+            
+            foot_elements = [cylinderfoot,foot_extruded]
+                
+
+            
+            
             
             
         def ac_geom3d_shelf_cabinet(bottomhight):
@@ -380,17 +410,17 @@ def RunCommand( is_interactive ):
                     base = (wallthickness, wallthickness, bottomhight)
                     basetarget = (wallthickness,wallthickness,0)
                     
-                    #shelf_depth = furniture_depth - 2 * wallthickness
+                    
                     
                     
                 else:
                     base = (wallthickness, 0, bottomhight)
                     basetarget = (wallthickness, 0,0)
                     
-                    #shelf_depth = furniture_depth - 2 * wallthickness
+                    
                 
                 shelf_width = furniture_width - 2 * wallthickness
-                #shelf_depth = furniture_depth - 2 * wallthickness
+                
                 bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
                 bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, basetarget)
                 rs.CapPlanarHoles(bottom_shelf)
@@ -677,38 +707,7 @@ def RunCommand( is_interactive ):
                 rs.LayerLocked(layer_geom2d, locked = True)
                 
             ac_geom_2d_sideboard_arrow()
-            
-    
-        def ac_branding():
-            global branding
-            pt = (0,10,0)
-            
-            author = "Joern Rettweiler \n 2018 august"
-            branding = rs.AddText(author,pt, height=1)
-            
-        
-        def ac_material_surface(mat2obj, element):
-            #Add Material Color, edit rgb values if you want another colors
-            
-            if element == "srf":
-                material_color = (255,245, 215)
-            elif element == "leg":
-                material_color = (230,230,230)
-            elif element == "textile":
-                material_color = (255,255,255)
-            
-            index_material = rs.AddMaterialToObject(mat2obj)
-            
-            mcolor = rs.MaterialColor(index_material, material_color) #ahorn
-            print "mcolor:"
-            print mcolor
-    
-    
-            rs.MaterialName(index_material, "Furniture_Surface")
-        
-            print "indexmateri"
-            print index_material
-            
+
         def ac_geom_2d_sofa():
             global geom_functionarea, geom_workarea, obj2d_function
             
@@ -861,16 +860,134 @@ def RunCommand( is_interactive ):
             #color
             ac_material_surface(pillow_3d, "textile")
             ac_material_surface(bed_3d, "textile")
-            #ac_material_surface(leg1, "leg")
-            #ac_material_surface(leg2, "leg")
-            #ac_material_surface(leg3, "leg")
-            #ac_material_surface(leg4, "leg")
+            
+            
+            
+            
             
             
             #some stuff should be removed in future..
             geom2d = leg1
-            geom_workarea = geom2d
-            geom_functionarea = geom2d
+
+            
+            
+        #def ac_branding():
+        #    global branding
+        #    pt = (0,10,0)
+        #    
+        #    author = "YOU NAME \n 2018 august"
+        #    branding = rs.AddText(author,pt, height=1)
+            
+        def ac_desk_special():
+            global obj2d_function
+            radius = 500
+            thickness_elements = 50
+            
+            
+            #furniture_depth = 1800
+            
+            
+            
+            
+            furniture_width2_cm = rs.GetInteger("Enter Furniture width2 must be smaller then width1(you enterd before[cm])", minimum=0)
+            furniture_width2 = furniture_width2_cm * 10
+            
+            furniture_depth2_cm = rs.GetInteger("Enter Furniture Depth2 must be smaller then Depth1(you enterd before[cm])", minimum=0)
+            furniture_depth2 = furniture_depth2_cm * 10
+            
+            
+            
+            #furniture_depth3 = furniture_depth - furniture_depth2 - radius
+
+                
+                
+            print "loop ended"
+            
+            #import Interval
+            
+            
+            pt1 = (0,0,0)
+            pt2 = (furniture_width,0,0)
+            pt3 = (furniture_width,furniture_depth2,0)
+            
+            pt4x =  furniture_width2 + radius
+            pt4 = (pt4x,furniture_depth2,0)
+            
+            pt5y = furniture_depth2 + radius
+            pt5 = (furniture_width2, pt5y, 0)
+            pt6 = (furniture_width2,furniture_depth,0 )
+            pt7 = (0,furniture_depth,0 )
+            
+            pts_2dgeom = [pt5,pt6,pt7,pt1,pt2,pt3,pt4]
+            
+            rs.CurrentLayer(layer_geom2d)
+            geom2d_desk_special = rs.AddPolyline(pts_2dgeom)
+            
+            
+            arcbase = (pt4x, pt5y,0)
+            arcbase2 = (pt4x, 0,0) 
+            
+            
+            
+            
+            arc = rs.AddArc(arcbase, radius, -90)
+            arc = rs.MirrorObject(arc, arcbase,arcbase2,copy=False)
+            
+            
+            obj2d_function = [arc, geom2d_desk_special]
+            
+            obj2d_function = rs.JoinCurves(obj2d_function, delete_input=True)
+            
+            ac_geom3d_desk_foot(furniture_width,furniture_depth2)
+            ac_geom3d_desk_foot(0,furniture_depth2)
+            
+            
+            # move foot 
+            translation_y = furniture_depth - furniture_depth2 - thickness_elements
+            translation = (0,translation_y,0)
+            foot3 = rs.CopyObjects(foot_elements,translation)
+            
+            rotation_pt_y = furniture_depth - thickness_elements
+            rotation_pt = (0,rotation_pt_y,0)
+            rs.RotateObjects(foot3, rotation_pt, 90, copy=False)
+            
+            plane_rectangle_pt = (0, 0, furniture_hight)
+            
+            obj3d_function = rs.CopyObject(obj2d_function, (0,0,furniture_hight))
+            table_table = rs.ExtrudeCurveStraight(obj3d_function, (0,0,furniture_hight),(0,0,(furniture_hight+20)))
+            rs.DeleteObject(obj3d_function)
+            
+            rs.CapPlanarHoles(table_table)
+            
+            
+            
+            #
+            
+        def ac_material_surface(mat2obj, element):
+            #Add Material Color, edit rgb values if you want another colors
+            
+            if element == "srf":
+                material_color = (255,245, 215)
+            elif element == "leg":
+                material_color = (230,230,230)
+            elif element == "textile":
+                material_color = (255,255,255)
+            
+            index_material = rs.AddMaterialToObject(mat2obj)
+            
+            mcolor = rs.MaterialColor(index_material, material_color) #ahorn
+            
+            
+    
+    
+            rs.MaterialName(index_material, "Furniture_Surface")
+        
+            
+            
+            
+
+            
+
             
             
         #############################
@@ -882,8 +999,8 @@ def RunCommand( is_interactive ):
         
         
         print "UP = Uprigth Section"
-        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa]", 5, 0, 10 )
-        print furniture_typ
+        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc]", 5, 0, 11 )
+        
         
         #Get Furniture Dimensions and Scale them to mm
         furniture_width_cm = rs.GetReal("Width of furniture [cm]", 80, 0)
@@ -891,7 +1008,7 @@ def RunCommand( is_interactive ):
         furniture_depth_cm = rs.GetReal("Depth of furniture [cm]", 42, 0)
         furniture_depth = furniture_depth_cm * 10
         
-            
+        
         
         if furniture_typ == 5:
             furniture_hight = 800
@@ -901,7 +1018,11 @@ def RunCommand( is_interactive ):
             furniture_hight = 800
             furniture_hight_cm = furniture_hight / 10
             
-            
+        elif furniture_typ == 11:
+            furniture_hight = 800
+            furniture_hight_cm = furniture_hight / 10
+        
+        
         else:
             furniture_hight = rs.GetReal("Hight of furniture [cm]", 80, 0)
             #print("Test")
@@ -912,7 +1033,7 @@ def RunCommand( is_interactive ):
         
         ac_lock_prevlayer()
         
-        ac_branding()
+        #ac_branding()
     
         #Add text to textvariable and execute main functions
         
@@ -989,6 +1110,10 @@ def RunCommand( is_interactive ):
             
             ac_geom_bed()
         
+        elif furniture_typ == 11:
+            furniture_name = "Desk"
+            ac_desk_special()
+        
         #elif furniture_typ == 3:
         #    furniture_name = "XXX"
         
@@ -1021,15 +1146,31 @@ def RunCommand( is_interactive ):
         rs.LayerLocked(layer_functionarea, locked = False)
         rs.LayerLocked(layer_text, locked = False)
         
-        print "objd function value"
-        print len(obj2d_function)
+        
+        
     
         #add all objects curves and polysrf to array/list
         obj3d = rs.ObjectsByType(16, select=False, state = 1)
-        blockobj = [geom_text,geom2d, geom_workarea, geom_functionarea]
+        blockobj = [geom_text]
+        
+        
+        
+        if 'geom2d' in globals():
+
+
+            blockobj.append(geom2d)
+
+        if 'geom_workarea' in globals():
+            blockobj.append(geom_workarea)
+
+        if 'geom_functionarea' in globals():
+            blockobj.append(geom_functionarea)
+        
+        
         blockobj.extend(obj3d)
+        
         blockobj.extend(obj2d_function)
-        blockobj.append(branding)
+        #blockobj.append(branding)
         
     
         
