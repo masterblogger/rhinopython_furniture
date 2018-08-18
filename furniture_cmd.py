@@ -26,7 +26,7 @@ def RunCommand( is_interactive ):
     #
     # Note: If you want to create a rhino command that you can call via command promt
     # look here: https://developer.rhino3d.com/guides/rhinopython/creating-rhino-commands-using-python/
- 
+
 
     
     
@@ -150,6 +150,9 @@ def RunCommand( is_interactive ):
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
             elif furniture_typ == 11:
+                textdottext = (furniture_name + "\n" 
+                + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
+            elif furniture_typ == 12:
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
             
@@ -369,8 +372,8 @@ def RunCommand( is_interactive ):
             
             
         def ac_geom3d_shelf_cabinet(bottomhight):
-            global shelf_objects
-            
+            global shelf_objects             
+            #bottomhight = bottomhight1
             
             wallthickness = 20
             
@@ -378,94 +381,99 @@ def RunCommand( is_interactive ):
             
             rs.CurrentLayer(layer_geom3d)
             
+            ac_geom3d_shelf_cabinet_sidewall(0)
+            ac_geom3d_shelf_cabinet_sidewall(furniture_width)
+            ac_geom3d_shelf_cabinet_inside(bottomhight)
+            ac_geom_top()
             
+        def ac_geom3d_shelf_cabinet_sidewall(base):
+            global sw
+            wallthickness = 20
             
+            if base > 0:
+                base = base - wallthickness
             
+            sw_pt1 = (base,0,0)
             
-            def ac_geom3d_shelf_cabinet_sidewall(base):
-                global sw
-                
-                if base > 0:
-                    base = base - wallthickness
-                
-                sw_pt1 = (base,0,0)
-                
-                #Sidewall
-                
-                sw = rs.AddRectangle(sw_pt1, wallthickness,  furniture_depth)
-                
-                sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthickness)))
-                rs.CapPlanarHoles(sw)
-                
-                #add material 
-                ac_material_surface(sw, "srf")
+            #Sidewall
             
-            def ac_geom3d_shelf_cabinet_inside():
+            sw = rs.AddRectangle(sw_pt1, wallthickness,  furniture_depth)
+            
+            rs.CurrentLayer(layer_geom3d)
+            sw = rs.ExtrudeCurveStraight(sw, (0,0,0), (0,0,(furniture_hight- wallthickness)))
+            rs.CapPlanarHoles(sw)
+            
+            #add material 
+            ac_material_surface(sw, "srf")
+            
+        def ac_geom3d_shelf_cabinet_inside(bottomhight):
+            
+            wallthickness = 20
+            
+            #bottom 
+            #attention 50 is hardocded value for bottom standing furniture!
+            shelf_depth = furniture_depth - 2 * wallthickness
+            
+            if bottomhight == 50:
+                base = (wallthickness, wallthickness, bottomhight)
+                basetarget = (wallthickness,wallthickness,0)
                 
-                #bottom 
-                #attention 50 is hardocded value for bottom standing furniture!
-                shelf_depth = furniture_depth - 2 * wallthickness
                 
-                if bottomhight == 50:
-                    base = (wallthickness, wallthickness, bottomhight)
-                    basetarget = (wallthickness,wallthickness,0)
-                    
-                    
-                    
-                    
-                else:
-                    base = (wallthickness, 0, bottomhight)
-                    basetarget = (wallthickness, 0,0)
-                    
-                    
                 
-                shelf_width = furniture_width - 2 * wallthickness
                 
-                bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
-                bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, basetarget)
-                rs.CapPlanarHoles(bottom_shelf)
+            else:
+                base = (wallthickness, 0, bottomhight)
+                basetarget = (wallthickness, 0,0)
                 
-                #Add material to obj
-                ac_material_surface(bottom_shelf, "srf")
                 
-                if furniture_hight >= 700:
-                    shelf_distance = 350 + wallthickness
-                    shelf_count = furniture_hight / shelf_distance
+            
+            shelf_width = furniture_width - 2 * wallthickness
+            
+            bottom_shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
+            bottom_shelf = rs.ExtrudeCurveStraight(bottom_shelf, base, basetarget)
+            rs.CapPlanarHoles(bottom_shelf)
+            
+            #Add material to obj
+            ac_material_surface(bottom_shelf, "srf")
+            
+            if furniture_hight >= 700:
+                shelf_distance = 350 + wallthickness
+                shelf_count = furniture_hight / shelf_distance
+                
+                #start posistion -> 50=bottomhight for distance between bottom shelf
+                shelf_position = shelf_distance + bottomhight
+                
+                print "shelf Count"
+                print shelf_count
+                #round up
+                shelf_count = shelf_count -1.5
+                print "shelf Count"
+                print shelf_count
+                
+                
+                loopbreaker = 0
+                while loopbreaker < shelf_count:
                     
-                    #start posistion -> 50=bottomhight for distance between bottom shelf
-                    shelf_position = shelf_distance + bottomhight
+                    base = (wallthickness, wallthickness, shelf_position)
                     
-                    print "shelf Count"
-                    print shelf_count
-                    #round up
-                    shelf_count = shelf_count -1.5
-                    print "shelf Count"
-                    print shelf_count
+                    shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
                     
                     
-                    loopbreaker = 0
-                    while loopbreaker < shelf_count:
-                        
-                        base = (wallthickness, wallthickness, shelf_position)
-                        
-                        shelf = rs.AddRectangle(base,shelf_width, shelf_depth)
-                        
-                        
-                        #
-                        base_extrude_target = (wallthickness, wallthickness, (shelf_position + wallthickness))
-                        shelf = rs.ExtrudeCurveStraight(shelf, base, base_extrude_target)
-                        
-                        rs.CapPlanarHoles(shelf)
-                        
-                        
-                        
-                        
-                        shelf_position = shelf_position + shelf_distance
-                        
-                        loopbreaker = loopbreaker + 1
-                        
-                        #add material
-                        ac_material_surface(shelf, "srf")
+                    #
+                    base_extrude_target = (wallthickness, wallthickness, (shelf_position + wallthickness))
+                    shelf = rs.ExtrudeCurveStraight(shelf, base, base_extrude_target)
+                    
+                    rs.CapPlanarHoles(shelf)
+                    
+                    
+                    
+                    
+                    shelf_position = shelf_position + shelf_distance
+                    
+                    loopbreaker = loopbreaker + 1
+                    
+                    #add material
+                    ac_material_surface(shelf, "srf")
             
             #back wall
             bw_pt = (wallthickness, furniture_depth, 0)
@@ -478,7 +486,8 @@ def RunCommand( is_interactive ):
             #add material to object back
             ac_material_surface(bw, "srf")
     
-            
+        def ac_geom_top():
+            wallthickness = 20
             #top
             tw_pt = (0,0,(furniture_hight- wallthickness))
             tw_pt_target = (0,0, furniture_hight)
@@ -496,7 +505,7 @@ def RunCommand( is_interactive ):
             ac_geom3d_shelf_cabinet_sidewall(furniture_width)
     
             
-            ac_geom3d_shelf_cabinet_inside()
+            #ac_geom3d_shelf_cabinet_inside()
             
             
             #add polysurfaces objects to group
@@ -583,6 +592,7 @@ def RunCommand( is_interactive ):
             ac_geom2d_wing_door(0)
             
             
+
     
     
         def ac_lock_prevlayer():
@@ -707,6 +717,9 @@ def RunCommand( is_interactive ):
                 rs.LayerLocked(layer_geom2d, locked = True)
                 
             ac_geom_2d_sideboard_arrow()
+            
+            
+            
 
         def ac_geom_2d_sofa():
             global geom_functionarea, geom_workarea, obj2d_function
@@ -868,15 +881,6 @@ def RunCommand( is_interactive ):
             
             #some stuff should be removed in future..
             geom2d = leg1
-
-            
-            
-        #def ac_branding():
-        #    global branding
-        #    pt = (0,10,0)
-        #    
-        #    author = "YOU NAME \n 2018 august"
-        #    branding = rs.AddText(author,pt, height=1)
             
         def ac_desk_special():
             global obj2d_function
@@ -959,9 +963,168 @@ def RunCommand( is_interactive ):
             
             rs.CapPlanarHoles(table_table)
             
+            #Add Material Color
+            ac_material_surface(table_table, "srf")
             
             
             #
+            
+        def ac_geom3d_pedestal():
+            
+            ac_geom3d_shelf_cabinet_sidewall(0)
+            ac_geom3d_shelf_cabinet_sidewall(furniture_width)
+            ac_geom_backwall(0)
+            ac_geom_top()
+            ac_geom_bottom(50)
+            ac_geom_drawer(50)
+            
+            
+        def ac_geom_backwall(base_x):
+            wallthickness = 20
+            base_y = furniture_depth - wallthickness
+            base_x = base_x + wallthickness
+            
+            bw_width  = furniture_width - 2*wallthickness
+            
+            #if base_x > 0:
+            #    base_x = furniture_width - wallthickness
+            
+            
+            base = (base_x, base_y, 0)
+            bw = rs.AddRectangle(base, bw_width, wallthickness)
+            
+            rs.CurrentLayer(layer_geom3d)
+            bw = rs.ExtrudeCurveStraight(bw, (0,0,0), (0,0,(furniture_hight- wallthickness)))
+            rs.CapPlanarHoles(bw)
+            
+            #add material color
+            ac_material_surface(bw,"srf")
+            
+        def ac_geom_bottom(bottom_heigth):
+            wallthickness = 20
+            
+            base = (wallthickness, wallthickness,0)
+            bottom_depth = furniture_depth - wallthickness * 2
+            bottom_width = furniture_width - wallthickness * 2
+            
+            
+            target = (wallthickness, wallthickness,bottom_heigth)
+            
+            bottom = rs.AddRectangle(base, bottom_width, bottom_depth)
+            rs.CurrentLayer(layer_geom3d)
+            bottom = rs.ExtrudeCurveStraight(bottom, base,target)
+            rs.CapPlanarHoles(bottom)
+            
+            ac_material_surface(bottom,"srf")
+            
+        def ac_geom_drawer(bottom_height):
+            
+            wallthickness = 20
+            drawer_height = 200
+            
+            #gap between drawers
+            gap_heigth = 10
+            
+            
+            rs.CurrentLayer(layer_geom3d)
+            #drawer
+            bottom_height = gap_heigth + bottom_height
+            
+            target_heigth = bottom_height + drawer_height
+            
+            base = (wallthickness, wallthickness,bottom_height)
+            drawer_depth = wallthickness
+            drawer_width = furniture_width - wallthickness * 2
+            
+            target = (wallthickness, wallthickness,target_heigth)
+            
+            drawer = rs.AddRectangle(base, drawer_width, drawer_depth)
+            rs.CurrentLayer(layer_geom3d)
+            drawer = rs.ExtrudeCurveStraight(drawer, base, target)
+            rs.CapPlanarHoles(drawer)
+            
+            #gap
+            
+            
+            drawer_count = furniture_hight - bottom_height - wallthickness 
+            drawer_count = drawer_count / drawer_height
+            print "drawer count"
+            print drawer_count
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            base_gap_y = wallthickness * 1.5
+            base_gap = (wallthickness, base_gap_y,bottom_height)
+            
+            gap_target_z = bottom_height - gap_heigth
+            gap_target = (wallthickness, base_gap_y,gap_target_z)
+            
+            gap =rs.AddRectangle(base_gap, drawer_width, wallthickness)
+            
+            
+            gap = rs.ExtrudeCurveStraight(gap, base_gap, gap_target)
+            
+            rs.CapPlanarHoles(gap)
+            
+            
+            #add material
+            ac_material_surface(gap,"leg")
+            ac_material_surface(drawer,"leg")
+            
+            
+            copyobj = [gap, drawer]
+            
+            copy_base_z = 0
+            copy_base = 0,0,0
+            loop_drawer = 0
+            while loop_drawer < drawer_count:
+                
+                
+                
+                
+                rs.CopyObjects(copyobj,copy_base)
+                copy_base_z = copy_base_z + drawer_height + gap_heigth
+                copy_base = (0, 0,copy_base_z)
+                
+                loop_drawer = loop_drawer + 1
+                
+                if loop_drawer >= (drawer_count - 1):
+                    print "penis"
+                    #add upper drawer, everytime smaller then other drawers
+                    rs.CopyObjects(gap,copy_base)
+                    
+                    copy_base_z = copy_base_z + gap_heigth + 50
+                    base_top_drawer = (wallthickness, wallthickness, copy_base_z)
+                    
+                    target_top_base_z = furniture_hight - wallthickness
+                    #target_top_base_z = copy_base_z + drawer_height + gap_heigth
+                    target_top_drawer = (wallthickness, wallthickness, target_top_base_z)
+                    
+                    print "2d drawer"
+                    print drawer
+                    drawer = rs.AddRectangle(base_top_drawer,drawer_width, drawer_depth)
+                    print "3d drawer"
+                    print drawer
+                    drawer = rs.ExtrudeCurveStraight(drawer, base_top_drawer, target_top_drawer)
+                    
+                    #if 'drawer' in locals(): 
+                    #    ac_material_surface(drawer,"leg")
+                    
+                    
+                    loop_drawer = drawer_count
+                
+                ac_material_surface(drawer,"leg")
+                
+                
+            
+            
             
         def ac_material_surface(mat2obj, element):
             #Add Material Color, edit rgb values if you want another colors
@@ -996,10 +1159,12 @@ def RunCommand( is_interactive ):
         
         
         
-        
+        #ac_geom3d_pedestal
         
         print "UP = Uprigth Section"
-        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc]", 5, 0, 11 )
+        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc, 12=Drawer Cabinet]", 5, 0, 12 )
+        
+        
         
         
         #Get Furniture Dimensions and Scale them to mm
@@ -1114,9 +1279,10 @@ def RunCommand( is_interactive ):
             furniture_name = "Desk"
             ac_desk_special()
         
-        #elif furniture_typ == 3:
-        #    furniture_name = "XXX"
-        
+        elif furniture_typ == 12:
+            furniture_name = "Drawer Cabinet"
+            ac_geom3d_pedestal()
+            ac_geom2d_functionarea(furniture_width, furniture_depth)
         
         
        
