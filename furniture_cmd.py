@@ -136,6 +136,9 @@ def RunCommand( is_interactive ):
                 depth = furniture_width
             
             
+            
+            
+            
             geom2d = rs.AddRectangle(planexy, width, depth)
             geom2d_centroid = rs.CurveAreaCentroid(geom2d)
             
@@ -219,10 +222,6 @@ def RunCommand( is_interactive ):
             blockname = (str(furniture_name) + str(furniture_width_cm) + "x" + str(furniture_depth_cm))
             
             
-            
-            
-            
-            
         def ac_geom2d_workarea(width):
             global geom_workarea, geom_functionarea
             
@@ -241,6 +240,9 @@ def RunCommand( is_interactive ):
             global geom_functionarea, geom_workarea
             
             planexy_wa = rs.WorldXYPlane()
+            
+            if furniture_typ == 14: #locker
+                depth = furniture_width
             
             
             # Reference (2018 august 08) https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/pdf/ASR-A1-2.pdf?__blob=publicationFile&v=7
@@ -375,10 +377,6 @@ def RunCommand( is_interactive ):
             
             foot_elements = [cylinderfoot,foot_extruded]
                 
-
-            
-            
-            
             
         def ac_geom3d_shelf_cabinet(bottomhight):
             global shelf_objects             
@@ -521,15 +519,11 @@ def RunCommand( is_interactive ):
             obj = rs.ObjectsByType(16, select=False, state = 0)
             geom3d = rs.AddObjectsToGroup(obj,group3d)
             
-            
-            
-            
-            
         def ac_geom3d_wing_door():
-            
+            global overlapping_door
             
             wallthickness = 20
-            door_width = furniture_width / 2 - wallthickness
+            
             
             #adjust door extrusion start point do avoid gaps
             if furniture_typ == 1:
@@ -538,72 +532,110 @@ def RunCommand( is_interactive ):
                 overlapping_door = 50 - 30
             
             
-            
-            
-            def ac_geom3d_wing_door_itself(base):
-                rotate = "flase"
-                
-                
-                
-                base_ogirinal = base
-                if base > 0:
-                    base = base / 2 - wallthickness
-                    rotate = "true"
-                
-                wdpt = (base + wallthickness, 0, overlapping_door)
-                wdtarget_hight = (furniture_hight - wallthickness)
-                wdtarget = (base + wallthickness,0,wdtarget_hight)
-                door1 = rs.AddRectangle(wdpt, door_width, wallthickness)
-                door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
-                
-                
-                if rotate == "true":
-                    wdp2 = (base_ogirinal - wallthickness, 0, 30)
-                    rs.RotateObject(door1,wdp2,30,None, copy=False)
-                
-                
-                rs.CapPlanarHoles(door1)
-                
-                #add material to object
-                ac_material_surface(door1, "srf")
-                
-                
-            def ac_geom2d_wing_door(base):
-                global  obj2d_function
-                
-                rs.CurrentLayer(layer_functionarea)
-                start_y_distance = (-1 * furniture_depth)
-                startpt = ((furniture_width / 2), 0 ,0)
-                endpt = (wallthickness,start_y_distance,0)
-                
-                point_on_arc_x = (furniture_width / 2) * +0.90
-                point_on_arc_y = furniture_depth * -0.33
-                point_on_arc = (point_on_arc_x, point_on_arc_y, 0)
-                
-                line =rs.AddLine(endpt, (wallthickness,0,0))
-                
-                arc = rs.AddArc3Pt(endpt, startpt,point_on_arc)
-                opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
-                
-                opening_projection2 = rs.MirrorObject(opening_projection1, ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
-                
-                
-                obj2d_function = [opening_projection2,opening_projection1]
-                
-                
-                
-                
-            
-            
             ac_geom3d_wing_door_itself(0)
             ac_geom3d_wing_door_itself(furniture_width)
-            
             ac_geom2d_wing_door(0)
             
             
-
-    
-    
+            
+            
+            
+            
+        def ac_geom3d_wing_door_itself(base):
+            rotate = "flase"
+            wallthickness = 20
+            door_width = furniture_width / 2 - wallthickness
+            
+            base_ogirinal = base
+            if base > 0:
+                base = base / 2 - wallthickness
+                rotate = "true"
+            
+            wdpt = (base + wallthickness, 0, overlapping_door)
+            wdtarget_hight = (furniture_hight - wallthickness)
+            wdtarget = (base + wallthickness,0,wdtarget_hight)
+            door1 = rs.AddRectangle(wdpt, door_width, wallthickness)
+            door1 = rs.ExtrudeCurveStraight(door1, wdpt, wdtarget)
+            
+            
+            if rotate == "true":
+                wdp2 = (base_ogirinal - wallthickness, 0, 30)
+                rs.RotateObject(door1,wdp2,30,None, copy=False)
+            
+            
+            rs.CapPlanarHoles(door1)
+            
+            #add material to object
+            ac_material_surface(door1, "srf")
+            
+            
+            
+            
+            
+            
+                
+        def ac_geom2d_wing_door(base):
+                wallthickness = 20
+                
+                print "leng"
+                #print obj2d_function
+                
+                ac_geom2_door(0,0,furniture_depth)
+                
+                opening_projection2 = rs.MirrorObject(obj2d_function[0], ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
+                obj2d_function.append(opening_projection2)
+        
+        
+        
+        def ac_geom2_door(furniture_width,mirror,furniture_depth):
+            global  obj2d_function, opening_projection2
+            wallthickness = 20
+            
+            
+            if furniture_typ == 14:
+                furniture_width = 2 * furniture_width - 2 * wallthickness
+                furniture_depth = 2 * furniture_depth - 2 * wallthickness
+            
+            
+            wallthickness = 20
+            obj2d_function = []
+            
+            rs.CurrentLayer(layer_functionarea)
+            start_y_distance = (-1 * furniture_depth)
+            startpt = ((furniture_width / 2), 0 ,0)
+            endpt = (wallthickness,start_y_distance,0)
+            
+            point_on_arc_x = (furniture_width / 2) * +0.90
+            point_on_arc_y = furniture_depth * -0.33
+            point_on_arc = (point_on_arc_x, point_on_arc_y, 0)
+            
+            line =rs.AddLine(endpt, (wallthickness,0,0))
+            
+            arc = rs.AddArc3Pt(endpt, startpt,point_on_arc)
+            opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
+            obj2d_function.append(opening_projection1)
+                
+                
+            if mirror == 1:
+                opening_projection2 = rs.MirrorObject(obj2d_function[0], ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
+                obj2d_function.append(opening_projection2)
+            
+                
+                
+                
+                
+                #obj2d_function = [opening_projection2,opening_projection1]
+                
+                
+                
+                
+            
+            
+            
+            
+            
+            
+            
         def ac_lock_prevlayer():
             
             
@@ -727,9 +759,6 @@ def RunCommand( is_interactive ):
                 
             ac_geom_2d_sideboard_arrow()
             
-            
-            
-
         def ac_geom_2d_sofa():
             global geom_functionarea, geom_workarea, obj2d_function
             
@@ -902,10 +931,10 @@ def RunCommand( is_interactive ):
             
             
             
-            furniture_width2_cm = rs.GetInteger("Enter Furniture width2 must be smaller then width1(you enterd before[cm])", minimum=0)
+            furniture_width2_cm = rs.GetInteger("Enter Furniture width2 must be smaller then width1(you enterd before[cm])", minimum=30)
             furniture_width2 = furniture_width2_cm * 10
             
-            furniture_depth2_cm = rs.GetInteger("Enter Furniture Depth2 must be smaller then Depth1(you enterd before[cm])", minimum=0)
+            furniture_depth2_cm = rs.GetInteger("Enter Furniture Depth2 must be smaller then Depth1(you enterd before[cm])", minimum=30)
             furniture_depth2 = furniture_depth2_cm * 10
             
             
@@ -986,8 +1015,121 @@ def RunCommand( is_interactive ):
             ac_geom_top()
             ac_geom_bottom(50)
             ac_geom_drawer(50)
+        
+        def ac_geom3d_pedestal_mobil():
             
             
+            ac_geom3d_shelf_cabinet_sidewall(0)
+            ac_geom3d_shelf_cabinet_sidewall(furniture_width)
+            ac_geom_backwall(0)
+            ac_geom_top()
+            ac_geom_bottom(50)
+            ac_geom_drawer(50)
+            
+            ac_geom3d_pedestal_mobile_rolls()
+            
+        def ac_geom3d_pedestal_mobile_rolls():
+            #roll_heigth = 100
+            table_tolerance = 10
+            wheel_thickness = 30
+            boundary_distance = 30
+            
+            rs.CurrentLayer(layer_geom3d)
+            objects = rs.ObjectsByType(16, select=False, state=1)
+            
+            move_z = desk_thickness + roll_height - table_tolerance
+            objects = rs.MoveObjects(objects, (0,0,move_z))
+            
+            
+            plane = rs.WorldYZPlane()
+            
+            
+            radius = roll_height / 2
+            wheel = rs.AddCylinder(plane,wheel_thickness,radius,cap=True)
+            
+            wheel_1 = rs.MoveObject(wheel, (boundary_distance,radius,radius))
+            
+            
+            wheel_2_pt_y = furniture_depth - 2 * radius
+            wheel_2_pt = (0,wheel_2_pt_y,0)
+            
+            wheel_2 = rs.CopyObject(wheel_1, wheel_2_pt)
+            
+            wheels = [wheel_1, wheel_2]
+            
+            wheel_3n4_x = furniture_width - wheel_thickness - boundary_distance - boundary_distance
+            wheel_3n4 = (wheel_3n4_x,0,0,)
+            wheel_3n4 = rs.CopyObjects(wheels,wheel_3n4)
+            
+        def ac_geom3d_locker():
+            
+            ac_geom3d_shelf_cabinet_sidewall(0)
+            ac_geom3d_shelf_cabinet_sidewall(furniture_width)
+            ac_geom_backwall(0)
+            ac_geom_top()
+            ac_geom3d_locker_door()
+            #ac_geom2d_wing_door(20)
+            
+            ac_geom2_door(furniture_width,"f",furniture_depth)
+            
+        def ac_geom3d_locker_door():
+            furniture_height = furniture_hight
+            
+            wallthickness = 20
+            door_start = 20
+            
+            
+            base = (wallthickness,0,door_start)
+            width = furniture_width - 2 * wallthickness
+            
+            door_height = furniture_height - wallthickness
+            target = (wallthickness, 0,door_height)
+            
+            door = rs.AddRectangle(base, width, wallthickness)
+            door =rs.ExtrudeCurveStraight(door, base, target)
+            rs.CapPlanarHoles(door)
+            
+            
+            #locker cuts
+            
+            
+            base_cut_x = furniture_width / 4
+            base_cut_z = furniture_height * 0.8
+            heigth_locker_cut = 20 + furniture_height * 0.8
+            
+            #add locker cuts
+            cuts = 0
+            
+            cut_objects = []
+            while cuts < 4:
+                
+                base_cut = (base_cut_x, 0,base_cut_z)
+                
+                target_cut = (base_cut_x,0,heigth_locker_cut)
+                
+                width = furniture_width / 2 
+                
+                
+                look_cut = rs.AddRectangle(base_cut,width,wallthickness)
+                look_cut = rs.ExtrudeCurveStraight(look_cut, base_cut,target_cut)
+                rs.CapPlanarHoles(look_cut)
+                print "lloppp"
+                print cuts
+                
+                cut_objects.append(look_cut)
+                
+                base_cut_z = base_cut_z - 40
+                heigth_locker_cut = heigth_locker_cut - 40
+                
+                cuts = cuts + 1
+            
+            rs.BooleanDifference(door,cut_objects,delete_input=True)
+            
+            
+            
+            
+            
+        
         def ac_geom_backwall(base_x):
             wallthickness = 20
             base_y = furniture_depth - wallthickness
@@ -1188,8 +1330,6 @@ def RunCommand( is_interactive ):
             ac_material_surface(foot_base,"leg")
             ac_material_surface(foot,"leg")
         
-        
-        
         def ac_material_surface(mat2obj, element):
             #Add Material Color, edit rgb values if you want another colors
             
@@ -1226,7 +1366,7 @@ def RunCommand( is_interactive ):
         #ac_geom3d_pedestal
         
         print "UP = Uprigth Section"
-        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc, 12=Drawer Cabinet]", 5, 0, 12 )
+        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc, 12=Drawer Cabinet, 13=Pedestral Mobile]", 5, 0, 14 )
         
         if furniture_typ == 4:
             print "_________________________________________"
@@ -1252,6 +1392,18 @@ def RunCommand( is_interactive ):
         elif furniture_typ == 11:
             furniture_hight = 800
             furniture_hight_cm = furniture_hight / 10
+        
+        elif furniture_typ == 13:
+            furniture_height = 800
+            
+            desk_thickness = 20
+            roll_height = 100
+            furniture_height = furniture_height -  roll_height - desk_thickness #instead of 800, becaus of wallthickness/ tablethickness, of 20
+            furniture_height_cm = furniture_height / 10
+            
+            furniture_hight = furniture_height
+            furniture_hight_cm = furniture_height
+            
         
         
         else:
@@ -1284,6 +1436,8 @@ def RunCommand( is_interactive ):
             ac_geom2d_functionarea(furniture_width, furniture_depth)
             ac_geom3d_shelf_cabinet(50)
             ac_geom3d_wing_door()
+            ac_geom2_door(furniture_width,1,furniture_depth)
+            
         
         #filling cabinet uprigth Section
         elif furniture_typ == 6:
@@ -1359,8 +1513,16 @@ def RunCommand( is_interactive ):
             ac_geom3d_pedestal()
             ac_geom2d_functionarea(furniture_width, furniture_depth)
         
+        elif furniture_typ == 13:
+            furniture_name = "Pedestral Mobile"
+            ac_geom3d_pedestal_mobil()
+            ac_geom2d_functionarea(furniture_width, furniture_depth)
         
-       
+        
+        elif furniture_typ == 14:
+            furniture_name = "Locker"
+            ac_geom3d_locker()
+            ac_geom2d_functionarea(furniture_width, furniture_depth)
         
         rs.CurrentLayer(layer=layer_geom2d)
         ac_geom2d(furniture_width, furniture_depth)
