@@ -17,7 +17,7 @@ def RunCommand( is_interactive ):
     # 
     # GNU GENERAL PUBLIC LICENSE Version 3
     #
-    # by Joern Rettweiler, 2018 august 16
+    # by Joern Rettweiler, 2018 august 19
     #
     #
     # Tested with Rhino 5 
@@ -121,18 +121,23 @@ def RunCommand( is_interactive ):
             
             rs.CurrentLayer(layer_geom2d)
             planexy = rs.WorldXYPlane()
-            geom2d = rs.AddRectangle(planexy, width, depth)
+            
             
             
 
             
             
-            geom2d_centroid = rs.CurveAreaCentroid(geom2d)
+            
             
             if furniture_typ == 11:
                 rs.DeleteObject(geom2d)
                 del geom2d
+            elif furniture_depth <= 0:
+                depth = furniture_width
             
+            
+            geom2d = rs.AddRectangle(planexy, width, depth)
+            geom2d_centroid = rs.CurveAreaCentroid(geom2d)
             
             basepoint = geom2d_centroid[1]
             
@@ -156,6 +161,10 @@ def RunCommand( is_interactive ):
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
             
+            if furniture_depth <= 0:
+                textdottext = (furniture_name + "\nd = " 
+                + str(furniture_width_cm) + "\nh = "
+                + str (furniture_height_cm))
             
             #bed and sofa
             elif furniture_typ == 9:
@@ -242,7 +251,7 @@ def RunCommand( is_interactive ):
             geom_workarea = geom_functionarea
         
         
-        def ac_geom3d_table():
+        def ac_geom3d_table_rectangle():
             
             global table_foot_3d, geom3d
             rs.CurrentLayer(layer_geom3d_pro)
@@ -888,7 +897,7 @@ def RunCommand( is_interactive ):
             thickness_elements = 50
             
             
-            #furniture_depth = 1800
+            
             
             
             
@@ -1122,10 +1131,65 @@ def RunCommand( is_interactive ):
                 
                 ac_material_surface(drawer,"leg")
                 
+        def ac_geom3d_table():
+            #decision for rectangle or circle table
+            if furniture_depth <= 1:
                 
+                ac_geom_3d_table_round()
+            else:
+                
+                ac_geom3d_table_rectangle()
+        
+        def ac_geom_3d_table_round():
+            global obj2d_function
+            thickness = 20
             
             
+            center_xy = furniture_width / 2
+            center = (center_xy, center_xy, 0)
+            radius = furniture_width / 2
+            foot_base_radius = radius / 2.5
+            radius_foot = 50
             
+            table_base = (center_xy, center_xy,furniture_height)
+            
+            table_target_z = furniture_height -thickness
+            table_target = (center_xy,center_xy,table_target_z)
+            
+            foot_target_z = furniture_height - thickness
+            foot_target = (center_xy,center_xy,foot_target_z)
+            
+            #rs.CurrentLayer(layer_geom2d)
+            #circle = rs.AddCircle(center, radius)
+            
+            circle_foot_base = rs.AddCircle(center, foot_base_radius)
+            circle_table = rs.AddCircle(table_base, radius) 
+            circle_foot = rs.AddCircle(center,radius_foot)
+            
+            rs.CurrentLayer(layer_geom2d)
+            circle = rs.AddCircle(center, radius)
+            
+            
+            obj2d_function = [circle]
+            
+            rs.CurrentLayer(layer_geom3d)
+            table =rs.ExtrudeCurveStraight(circle_table,table_base,table_target)
+            rs.CapPlanarHoles(table)
+            
+            foot_base =rs.ExtrudeCurveStraight(circle_foot_base,table_base,table_target)
+            rs.CapPlanarHoles(foot_base)
+            
+            #table_base = (center_xy, center_xy,foot_target)
+            foot = rs.ExtrudeCurveStraight(circle_foot,center,foot_target)
+            rs.CapPlanarHoles(foot)
+            
+            #add material
+            ac_material_surface(table,"srf")
+            ac_material_surface(foot_base,"leg")
+            ac_material_surface(foot,"leg")
+        
+        
+        
         def ac_material_surface(mat2obj, element):
             #Add Material Color, edit rgb values if you want another colors
             
@@ -1164,8 +1228,10 @@ def RunCommand( is_interactive ):
         print "UP = Uprigth Section"
         furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc, 12=Drawer Cabinet]", 5, 0, 12 )
         
-        
-        
+        if furniture_typ == 4:
+            print "_________________________________________"
+            print "HINT You want a Round Table set depth = 0"
+            print "_________________________________________"
         
         #Get Furniture Dimensions and Scale them to mm
         furniture_width_cm = rs.GetReal("Width of furniture [cm]", 80, 0)
@@ -1190,15 +1256,24 @@ def RunCommand( is_interactive ):
         
         else:
             furniture_hight = rs.GetReal("Hight of furniture [cm]", 80, 0)
-            #print("Test")
+            
             furniture_hight = furniture_hight *10
             furniture_hight_cm = furniture_hight / 10
+            
+            
+            
+            
+        if furniture_depth <= 0:
+            furniture_height = rs.GetReal("Hight of furniture [cm]", 80, 0)
+            furniture_height_cm = furniture_height
+            furniture_height = furniture_height * 10
+            
     
         ac_layercreation()
         
         ac_lock_prevlayer()
         
-        #ac_branding()
+        
     
         #Add text to textvariable and execute main functions
         
