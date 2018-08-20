@@ -43,6 +43,7 @@ def RunCommand( is_interactive ):
         
         
         obj2d_function = []
+        wallthickness = 20
      
       
       
@@ -129,10 +130,10 @@ def RunCommand( is_interactive ):
             
             
             
-            if furniture_typ == 11:
-                rs.DeleteObject(geom2d)
-                del geom2d
-            elif furniture_depth <= 0:
+            #if furniture_typ == 11:
+                #rs.DeleteObject(geom2d)
+                #del geom2d
+            if furniture_depth <= 0:
                 depth = furniture_width
             
             
@@ -244,6 +245,8 @@ def RunCommand( is_interactive ):
             if furniture_typ == 14: #locker
                 depth = furniture_width
             
+            if furniture_typ == 1: #cabinet
+                depth = furniture_width / 2 + wallthickness 
             
             # Reference (2018 august 08) https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/pdf/ASR-A1-2.pdf?__blob=publicationFile&v=7
             depth = depth * -1 
@@ -582,8 +585,8 @@ def RunCommand( is_interactive ):
                 
                 ac_geom2_door(0,0,furniture_depth)
                 
-                opening_projection2 = rs.MirrorObject(obj2d_function[0], ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
-                obj2d_function.append(opening_projection2)
+                #opening_projection2 = rs.MirrorObject(obj2d_function[0], ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
+                #obj2d_function.append(opening_projection2)
         
         
         
@@ -595,14 +598,23 @@ def RunCommand( is_interactive ):
             if furniture_typ == 14:
                 furniture_width = 2 * furniture_width - 2 * wallthickness
                 furniture_depth = 2 * furniture_depth - 2 * wallthickness
-            
-            
-            wallthickness = 20
+                startpt = ((furniture_width / 2), 0 ,0)
+            else:
+                startpt = ((furniture_width / 2), 0 ,0)
+                mirror_x = furniture_width
+                
+                furniture_depth = furniture_width / 2 - wallthickness
+                furniture_width = furniture_width - 2 * wallthickness
+                
+                
+                
+                
             obj2d_function = []
             
             rs.CurrentLayer(layer_functionarea)
-            start_y_distance = (-1 * furniture_depth)
-            startpt = ((furniture_width / 2), 0 ,0)
+            start_y_distance = (-1 * furniture_depth - 2 * wallthickness)
+            #startpt = ((furniture_width / 2), 0 ,0)
+            
             endpt = (wallthickness,start_y_distance,0)
             
             point_on_arc_x = (furniture_width / 2) * +0.90
@@ -612,14 +624,15 @@ def RunCommand( is_interactive ):
             line =rs.AddLine(endpt, (wallthickness,0,0))
             
             arc = rs.AddArc3Pt(endpt, startpt,point_on_arc)
-            opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
-            obj2d_function.append(opening_projection1)
-                
+            #opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
+            obj2d_function.append(line)
+            obj2d_function.append(arc)
                 
             if mirror == 1:
-                opening_projection2 = rs.MirrorObject(obj2d_function[0], ((furniture_width /2),0,0), ((furniture_width /2),wallthickness,0),copy=True)
+                opening_projection2 = rs.MirrorObjects(obj2d_function[1], ((mirror_x /2),0,0), ((mirror_x /2),wallthickness,0),copy=True)
                 obj2d_function.append(opening_projection2)
-            
+                opening_projection2 = rs.MirrorObjects(obj2d_function[0], ((mirror_x /2),0,0), ((mirror_x /2),wallthickness,0),copy=True)
+                obj2d_function.append(opening_projection2)
                 
                 
                 
@@ -1366,7 +1379,7 @@ def RunCommand( is_interactive ):
         #ac_geom3d_pedestal
         
         print "UP = Uprigth Section"
-        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=Misc, 12=Drawer Cabinet, 13=Pedestral Mobile]", 5, 0, 14 )
+        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=L-Desk, 12=Drawer Cabinet, 13=Pedestral Mobile]", 5, 0, 14 )
         
         if furniture_typ == 4:
             print "_________________________________________"
