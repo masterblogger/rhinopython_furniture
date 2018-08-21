@@ -4,6 +4,7 @@ global rs, rhino
 
 import rhinoscriptsyntax as rs
 import Rhino as rhino
+import math
 
 __commandname__ = "furniture"
 
@@ -122,22 +123,9 @@ def RunCommand( is_interactive ):
             
             rs.CurrentLayer(layer_geom2d)
             planexy = rs.WorldXYPlane()
-            
-            
-            
 
-            
-            
-            
-            
-            #if furniture_typ == 11:
-                #rs.DeleteObject(geom2d)
-                #del geom2d
             if furniture_depth <= 0:
                 depth = furniture_width
-            
-            
-            
             
             
             geom2d = rs.AddRectangle(planexy, width, depth)
@@ -146,6 +134,19 @@ def RunCommand( is_interactive ):
             basepoint = geom2d_centroid[1]
             
             ac_text(geom2d_centroid)
+            
+            if furniture_typ == 11:
+                rs.DeleteObject(geom2d)
+                del geom2d
+            elif furniture_typ == 15:
+                rs.DeleteObject(geom2d)
+                del geom2d
+            if furniture_depth <= 0:
+                depth = furniture_width
+                rs.DeleteObject(geom2d)
+                del geom2d
+            
+            
         
         def ac_text(geom2d_centroid):
             global geom_text, blockname
@@ -155,6 +156,12 @@ def RunCommand( is_interactive ):
             if furniture_typ == 4:
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
+                if furniture_depth <= 0:
+                    textdottext = (furniture_name + "\nd = " 
+                    + str(furniture_width_cm) + "\nh = "
+                    + str (furniture_height_cm))
+                
+                
             elif furniture_typ == 5:
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
@@ -165,10 +172,7 @@ def RunCommand( is_interactive ):
                 textdottext = (furniture_name + "\n" 
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm))
             
-            if furniture_depth <= 0:
-                textdottext = (furniture_name + "\nd = " 
-                + str(furniture_width_cm) + "\nh = "
-                + str (furniture_height_cm))
+            
             
             #bed and sofa
             elif furniture_typ == 9:
@@ -198,7 +202,7 @@ def RunCommand( is_interactive ):
                 + str(furniture_width_cm)+ " x " + str(furniture_depth_cm) + "\n" + str(divan_bed)+ people)
             
             
-            else:
+            elif furniture_typ == 1 or 2 or 3:
                 
                 #Generate folder height 
                 #DOPPLE CHECK THIS VALUE EXIST ALSO AT function ac_geom3d_shelf_cabinet!!!
@@ -298,7 +302,9 @@ def RunCommand( is_interactive ):
                 ac_material_surface(table_foot, "leg")
                 
                 loop_count = loop_count + 1
-                
+            
+            rs.DeleteObjects(table_foot_2d)
+            
             #Add table plate
             plane_rectangle_pt = (0, 0, furniture_hight)
             table_table = rs.AddRectangle(plane_rectangle_pt, furniture_width, furniture_depth)
@@ -640,13 +646,7 @@ def RunCommand( is_interactive ):
                 #obj2d_function = [opening_projection2,opening_projection1]
                 
                 
-                
-                
-            
-            
-            
-            
-            
+
             
             
         def ac_lock_prevlayer():
@@ -1343,6 +1343,115 @@ def RunCommand( is_interactive ):
             ac_material_surface(foot_base,"leg")
             ac_material_surface(foot,"leg")
         
+        def ac_geom_3d_table_trapez():
+            global obj2d_function
+            geom2d = []
+            distance = 50
+            
+            
+            rs.CurrentLayer(layer_geom2d)
+            pt_1 = (0,0,0)
+            pt_2 = (furniture_width,0,0)
+            
+            pt_3 = (furniture_width,(furniture_depth*2),0)
+            pt_4 = (0,furniture_depth,0)
+            
+            line_1 =rs.AddLine(pt_1,pt_2)
+            
+            
+            
+     
+            
+            #print "XXX width_2 subsX"
+            #print width_2_subs
+            
+            angle = 30
+            #
+            
+            angle = math.radians(angle)
+            #angle = radians(angle)
+            width_2_subs =  math.tan(angle) * furniture_depth 
+            print "tan"
+            print math.tan(angle)
+            
+            print "tang"
+            tang = 242.502 / 420
+            tang = math.tan(tang)
+     
+     
+            
+            pt_31_x = furniture_width - width_2_subs
+            pt_41_x = width_2_subs
+           
+            
+            
+            pt_31 = [pt_31_x, furniture_depth,0]
+            pt_41 = [pt_41_x, furniture_depth,0]
+            
+            geom_2d = [pt_1, pt_2, pt_31,pt_41, pt_1]
+            
+            
+            #rs.AddLine(pt_4, pt_31)
+            geom_2d = rs.AddPolyline(geom_2d)
+            obj2d_function = [geom_2d]
+            
+            #rs.AddPolyline()
+            
+            #foot base geom
+            
+            rs.CurrentLayer(layer_geom3d)
+            def foot_table(dim, basept):
+                
+                target_x = basept[0]
+                target_y = basept[1]
+                
+                target_z = furniture_height - wallthickness
+                target = [target_x, target_y, target_z]
+                
+                
+                foot_rec = rs.AddRectangle(basept, dim, dim)
+                foot = rs.ExtrudeCurveStraight(foot_rec, basept, target)
+                rs.CapPlanarHoles(foot)
+                
+                rs.DeleteObject(foot_rec)
+                 
+                ac_material_surface(foot,"leg")
+            
+            
+            distance = 50
+            basept_1 = [distance, (distance/2),0]
+            foot_table(distance,basept_1)
+            
+            basept_2x = furniture_width - 2 * distance
+            basept_2 = [basept_2x, (distance/2),0]
+            foot_table(distance,basept_2)
+            
+            basept_3x = pt_31_x - distance
+            basept_3y = furniture_depth - 1.5 * distance
+            basept_3 = [basept_3x, basept_3y, 0]
+            foot_table(distance,basept_3)
+            
+            basept_4x = pt_41_x  
+            basept_4y = furniture_depth -  1.5 * distance
+            basept_4 = [basept_4x, basept_4y, 0]
+            foot_table(distance,basept_4)
+            
+            ex_stpt_z = furniture_height - wallthickness
+            
+            ex_stpt = [0,0,ex_stpt_z]
+            ex_endpt = [0,0,furniture_height]
+            
+            extrusion_base = rs.CopyObject(geom_2d, ex_stpt)
+            table_table = rs.ExtrudeCurveStraight(extrusion_base, ex_stpt,ex_endpt)
+            rs.CapPlanarHoles(table_table)
+            
+            rs.DeleteObject(extrusion_base)
+            
+            #add material
+            ac_material_surface(table_table,"srf")
+            
+        
+        
         def ac_material_surface(mat2obj, element):
             #Add Material Color, edit rgb values if you want another colors
             
@@ -1379,7 +1488,7 @@ def RunCommand( is_interactive ):
         #ac_geom3d_pedestal
         
         print "UP = Uprigth Section"
-        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=L-Desk, 12=Drawer Cabinet, 13=Pedestral Mobile]", 5, 0, 14 )
+        furniture_typ = rs.GetInteger("1=filling cabinet 2=Shelf 3=sideboard 4=table, 5=desk, 6=filling cabinet UP, 7=sideboard UP,8 shelf UP, 9=Sofa, 10=Bed, 11=L-Desk, 12=Drawer Cabinet, 13=Pedestral Mobile, 14=locker, 15=Trapez table]", 5, 0, 15 )
         
         if furniture_typ == 4:
             print "_________________________________________"
@@ -1417,7 +1526,10 @@ def RunCommand( is_interactive ):
             furniture_hight = furniture_height
             furniture_hight_cm = furniture_height
             
-        
+        elif furniture_typ == 15:
+            furniture_hight = 800
+            furniture_hight_cm = 80
+            furniture_height = 800
         
         else:
             furniture_hight = rs.GetReal("Hight of furniture [cm]", 80, 0)
@@ -1536,6 +1648,10 @@ def RunCommand( is_interactive ):
             furniture_name = "Locker"
             ac_geom3d_locker()
             ac_geom2d_functionarea(furniture_width, furniture_depth)
+            
+        elif furniture_typ == 15:
+               furniture_name = "table_trapez"
+               ac_geom_3d_table_trapez()
         
         rs.CurrentLayer(layer=layer_geom2d)
         ac_geom2d(furniture_width, furniture_depth)
