@@ -4,6 +4,7 @@ Commercial use Allowed
 
 
 This script allows you to generate following furnitures as block elements:
+
   rectangular Desk,
   rectangular tables
   rectangular couch,
@@ -14,9 +15,10 @@ This script allows you to generate following furnitures as block elements:
   rectangular mobile file cabinets,
   rectangular sideboards,
   
-  
+  Non-rectangular Furnitures
   circluar tables,
-  L-Desks,
+  L-Desks 
+  Trapeze tables [angle 30 degree],
   
   
   All blocks contains: 
