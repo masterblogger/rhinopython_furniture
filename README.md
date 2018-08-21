@@ -14,6 +14,7 @@ This script allows you to generate following furnitures as block elements:
   rectangular mobile file cabinets,
   rectangular sideboards,
   
+  
   circluar tables,
   L-Desks,
   
