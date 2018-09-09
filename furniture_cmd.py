@@ -459,13 +459,11 @@ def RunCommand( is_interactive ):
                 #start posistion -> 50=bottomhight for distance between bottom shelf
                 shelf_position = shelf_distance + bottomhight
                 
-                print "shelf Count"
-                print shelf_count
+                                
                 #round up
                 shelf_count = shelf_count -1.5
-                print "shelf Count"
-                print shelf_count
                 
+                                
                 
                 loopbreaker = 0
                 while loopbreaker < shelf_count:
@@ -664,9 +662,8 @@ def RunCommand( is_interactive ):
             while loopbreaker < len(layername):
                 rs.LayerLocked(layername[loopbreaker], locked=True)
                 loopbreaker = loopbreaker + 1
-                print "loop"
-                print loopbreaker
-    
+                
+                    
         def ac_geom3d_sideboard_door():
             
             
