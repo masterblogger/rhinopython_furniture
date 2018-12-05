@@ -33,4 +33,6 @@ This script allows you to generate following furnitures as block elements:
  
  Table => https://youtu.be/gmX7-_-Ht4w
  
+ Table round => https://youtu.be/D72jXqu-GfU
+ 
  Desk =>
