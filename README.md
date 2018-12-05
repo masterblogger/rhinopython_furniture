@@ -35,4 +35,6 @@ This script allows you to generate following furnitures as block elements:
  
  Table round => https://youtu.be/D72jXqu-GfU
  
- Desk =>
+ Desk => https://youtu.be/YkRPnaGaddw
+ 
+ Filling Cabinet => https://youtu.be/ybxHd5cwgLI 
