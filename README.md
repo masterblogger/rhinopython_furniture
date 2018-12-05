@@ -28,6 +28,9 @@ This script allows you to generate following furnitures as block elements:
     
  
  See also for visual documentation at youtube:
- Shelf => 
+ 
+ Shelf => https://youtu.be/y1FpRgN4u1E
+ 
  Table => https://youtu.be/gmX7-_-Ht4w
+ 
  Desk =>
