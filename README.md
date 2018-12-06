@@ -40,3 +40,5 @@ This script allows you to generate following furnitures as block elements:
  Filling Cabinet => https://youtu.be/ybxHd5cwgLI 
  
  mobile pedestral => https://youtu.be/HgCMpp93fno
+ 
+ sofa => https://youtu.be/uqqV6X8-R9o
