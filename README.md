@@ -1,6 +1,6 @@
-# rhinopython
+# rhinopython furniture
 Sripts for Rhinoceros Rhino3D Rhino 
-Commercial use Allowed 
+GPL License
 
 
 This script allows you to generate following furnitures as block elements:
@@ -18,7 +18,7 @@ This script allows you to generate following furnitures as block elements:
   Non-rectangular Furnitures
   circluar tables,
   L-Desks 
-  Trapeze tables [angle 30 degree],
+  trapezoid tables [fixed angle 30 degree],
   
   
   All blocks contains: 
@@ -27,7 +27,7 @@ This script allows you to generate following furnitures as block elements:
     block layer
     
  
- See also for visual documentation at youtube:
+ See also my video documentation at youtube:
  
  Shelf => https://youtu.be/y1FpRgN4u1E
  
