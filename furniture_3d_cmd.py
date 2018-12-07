@@ -594,7 +594,7 @@ def RunCommand( is_interactive ):
         def ac_geom2d_wing_door(base):
                 wallthickness = 20
                 
-                print "leng"
+                #print "leng"
                 #print obj2d_function
                 
                 ac_geom2_door(0,0,furniture_depth)
@@ -610,9 +610,16 @@ def RunCommand( is_interactive ):
             
             
             if furniture_typ == 14:
+                #locker
+                
+                furniture_netto_width = furniture_width - 2 * wallthickness
                 furniture_width = 2 * furniture_width - 2 * wallthickness
                 furniture_depth = 2 * furniture_depth - 2 * wallthickness
                 startpt = ((furniture_width / 2), 0 ,0)
+                
+                start_y_distance = (-1 * furniture_netto_width - 2 * wallthickness)
+                endpt = (wallthickness,start_y_distance,0)
+                
             else:
                 startpt = ((furniture_width / 2), 0 ,0)
                 mirror_x = furniture_width
@@ -620,8 +627,8 @@ def RunCommand( is_interactive ):
                 furniture_depth = furniture_width / 2 - wallthickness
                 furniture_width = furniture_width - 2 * wallthickness
                 
-                
-                
+                start_y_distance = (-1 * furniture_depth - 2 * wallthickness)
+                endpt = (wallthickness,start_y_distance,0)
                 
             obj2d_function = []
             
@@ -629,7 +636,7 @@ def RunCommand( is_interactive ):
             start_y_distance = (-1 * furniture_depth - 2 * wallthickness)
             #startpt = ((furniture_width / 2), 0 ,0)
             
-            endpt = (wallthickness,start_y_distance,0)
+            #endpt = (wallthickness,start_y_distance,0)
             
             point_on_arc_x = (furniture_width / 2) * +0.90
             point_on_arc_y = furniture_depth * -0.33
@@ -638,6 +645,8 @@ def RunCommand( is_interactive ):
             line =rs.AddLine(endpt, (wallthickness,0,0))
             
             arc = rs.AddArc3Pt(endpt, startpt,point_on_arc)
+            
+            
             #opening_projection1 = rs.JoinCurves([line,arc], delete_input=True)
             obj2d_function.append(line)
             obj2d_function.append(arc)
@@ -654,7 +663,7 @@ def RunCommand( is_interactive ):
                 #obj2d_function = [opening_projection2,opening_projection1]
                 
                 
-
+            
             
             
         def ac_lock_prevlayer():
@@ -942,6 +951,8 @@ def RunCommand( is_interactive ):
             geom2d = leg1
             
         def ac_desk_special():
+            #L-Desk 
+            
             global obj2d_function
             radius = 500
             thickness_elements = 50
@@ -1364,15 +1375,13 @@ def RunCommand( is_interactive ):
             pt_3 = (furniture_width,(furniture_depth*2),0)
             pt_4 = (0,furniture_depth,0)
             
-            line_1 =rs.AddLine(pt_1,pt_2)
+            
+            
+   
             
             
             
-     
-            
-            
-            
-            
+            #edit this if you wante to change the shape of the trapezoid table 
             angle = 30
             #
             
@@ -1402,6 +1411,7 @@ def RunCommand( is_interactive ):
             #rs.AddLine(pt_4, pt_31)
             geom_2d = rs.AddPolyline(geom_2d)
             obj2d_function = [geom_2d]
+            
             
             #rs.AddPolyline()
             
