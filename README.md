@@ -3,17 +3,26 @@ Sripts for Rhinoceros Rhino3D Rhino
 GPL License
 
 
-This script allows you to generate following furnitures as block elements:
-
-  rectangular Desk,
-  rectangular tables
-  rectangular couch,
-  rectangular shelfs,
-  rectangular filling cabinet,
-  rectangular pedestrals,
-  rectangular locker,
-  rectangular mobile file cabinets,
-  rectangular sideboards,
+### This script allows you to generate following furnitures as block elements:
+  
+  
+  
+  #### rectuangular furniture: 
+   Desk,
+   tables
+   couch,
+   shelfs,
+   filling cabinet,
+   pedestrals,
+   locker,
+   mobile file cabinets,
+   sideboards,
+  
+  #### circular furniture: 
+   tables
+  
+  #### polygonal furniture: 
+  trapezoid tables
   
   Non-rectangular Furnitures
   circluar tables,
@@ -22,13 +31,18 @@ This script allows you to generate following furnitures as block elements:
   
   
   All blocks contains: 
+  
     2-d projection of the furniture which is in a sperate Layer
+    
     3-d projection of the furniture which is in a sperate Layer
+    
+    working area (reference to arbeitsstaettenrichtlinie | labor facility suggestion)
+    
     block layer
     
  
- See also my video documentation at youtube:
- 
+ ### Video documentation at youtube:
+  
  Shelf => https://youtu.be/y1FpRgN4u1E
  
  Table => https://youtu.be/gmX7-_-Ht4w
@@ -42,3 +56,7 @@ This script allows you to generate following furnitures as block elements:
  mobile pedestral => https://youtu.be/HgCMpp93fno
  
  sofa => https://youtu.be/uqqV6X8-R9o
+ 
+ drawer cabinet => https://youtu.be/urgOZJy7cQE
+ 
+ trapezoid table => https://youtu.be/9-rQmNWUiuo
