@@ -7,7 +7,7 @@ GPL License
   
   
   
-  #### rectuangular furniture: 
+  #### rectangular furniture: 
    Desk,
    tables
    couch,
@@ -24,13 +24,13 @@ GPL License
   #### polygonal furniture: 
   trapezoid tables
   
-  Non-rectangular Furnitures
-  circluar tables,
+  #### Non-rectangular Furnitures
+  
   L-Desks 
   trapezoid tables [fixed angle 30 degree],
   
   
-  All blocks contains: 
+  All blocks elements contains: 
   
     2-d projection of the furniture which is in a sperate Layer
     
@@ -38,18 +38,18 @@ GPL License
     
     working area (reference to arbeitsstaettenrichtlinie | labor facility suggestion)
     
-    block layer
+    block layer, with dedicated layers for 2-d & 3-d projections
     
  
  ### Video documentation at youtube:
   
- Shelf => https://youtu.be/y1FpRgN4u1E
+ Shelf => https://youtu.be/3ZGpIYNHvcQ
  
- Table => https://youtu.be/gmX7-_-Ht4w
+ Table => https://youtu.be/VBNLBixLPP8
  
  Table round => https://youtu.be/D72jXqu-GfU
  
- Desk => https://youtu.be/YkRPnaGaddw
+ Desk => https://youtu.be/WM6jfQnod4E
  
  Filling Cabinet => https://youtu.be/ybxHd5cwgLI 
  
