@@ -1,0 +1,8 @@
+Installation:
+click at the furniture.rhi file and execute it. ignore the files called "__plugin_.py" and "furniture_3d_cmd.py"
+Follow the instruction
+
+
+
+if this way do not work, you can also install the script manually in your rhino python plug in paths, 
+for more information about it check the rhino help desk.
