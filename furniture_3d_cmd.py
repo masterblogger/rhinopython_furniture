@@ -11,7 +11,7 @@ __commandname__ = "furniture_3d"
 # RunCommand is the called when the user enters the command name in Rhino.
 # The command name is defined by the filname minus "_cmd.py"
 def RunCommand( is_interactive ):
-    #import rhinoscriptsyntax as rs
+    
     
     # Generates simply 2d & 3D rectangular furniture elments
     # Generates simply 2d & 3D rectangular furniture elments
@@ -70,6 +70,10 @@ def RunCommand( is_interactive ):
             
             global layer_furniture, layer_geom2d, layer_geom3d, layer_workarea, layer_text, layer_functionarea, layer_furniture_color, layer_geom2d_color, layer_geom3d_color, layer_workarea_color, layer_functionarea_color, layer_text_color, layer_geom3d_pro
             
+            
+            
+            ac_user_layer_state()
+            
             #Parent layer
             layer_furniture = ("Furniture")
             layer_furniture_color = [0,0,0]
@@ -125,6 +129,33 @@ def RunCommand( is_interactive ):
             
             rs.CurrentLayer(layer_furniture)
         
+        
+        def ac_user_layer_state():
+            #save current locked layer states
+            global layer_locked_states_list, user_layer_names
+            layer_locked_states_list = []
+            
+            user_layer_names = rs.LayerNames()
+            
+            if user_layer_names:
+                
+                for user_layer in user_layer_names:
+                    layer_locked_state = rs.LayerLocked(user_layer)
+                    
+                    layer_locked_states_list.append(layer_locked_state)
+            
+        
+        def ac_rechange_layer_state():
+            #redo locked layer states, befor executing script
+            if user_layer_names:
+                
+                layer_index = 0
+                while layer_index < len(user_layer_names):
+                    rs.LayerLocked(user_layer_names[layer_index],locked=layer_locked_states_list[layer_index]) 
+                    
+                    layer_index += 1
+                
+            
         
         def ac_geom2d(width, depth):
             global geom_text, geom2d, blockname, basepoint
@@ -1734,13 +1765,17 @@ def RunCommand( is_interactive ):
             
             
             
-            
-    
+        print layer_locked_states_list
+        ac_rechange_layer_state()
+        
+        
     
     
     
     #call function
     ac_furniture()
+    
+    
 
 
 
