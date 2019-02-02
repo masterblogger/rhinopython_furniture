@@ -74,6 +74,7 @@ def RunCommand( is_interactive ):
             
             ac_user_layer_state()
             
+            # change here your layer names if needed 
             #Parent layer
             layer_furniture = ("Furniture")
             layer_furniture_color = [0,0,0]
@@ -131,8 +132,11 @@ def RunCommand( is_interactive ):
         
         
         def ac_user_layer_state():
-            #save current locked layer states
-            global layer_locked_states_list, user_layer_names
+            #save current locked layer states and current active layer
+            global layer_locked_states_list, user_layer_names, current_user_layer
+            
+            current_user_layer = rs.CurrentLayer()
+            
             layer_locked_states_list = []
             
             user_layer_names = rs.LayerNames()
@@ -704,7 +708,20 @@ def RunCommand( is_interactive ):
             
             print "layerbane"
             print layername[1]
-            print len(layername)
+            #print len(layername)
+            rs.LayerLocked(layer_furniture)
+            
+            #remove "furniture layer" from layername list:
+            #this layer caused problems wiht dialog button
+            for index in layername:
+                
+                
+                print index
+                if index == layer_furniture:
+                    layername.remove(index)
+                    
+            
+            
             loopbreaker = 0
             
             
@@ -714,7 +731,9 @@ def RunCommand( is_interactive ):
                 loopbreaker = loopbreaker + 1
                 
                 
-    
+            
+            print "bug"
+            
         def ac_geom3d_sideboard_door():
             
             
@@ -756,6 +775,7 @@ def RunCommand( is_interactive ):
                 wallthickness = 20
                 #arrow_distance = 100
                 arrow_width = 25
+                
                 
                 rs.LayerLocked(layer_geom2d, locked = False)
                 rs.CurrentLayer(layer_geom2d)
@@ -813,8 +833,8 @@ def RunCommand( is_interactive ):
                 geom_2d_sideboard_arrow_arrow(150, 1)
                 
                 
-                
-                
+                #switch to main layer causeing locking layer
+                rs.CurrentLayer(layer_furniture)
                 
                 rs.LayerLocked(layer_geom2d, locked = True)
                 
@@ -1753,6 +1773,7 @@ def RunCommand( is_interactive ):
         blockobj.extend(obj2d_function)
         #blockobj.append(branding)
         
+        
     
         
         
@@ -1768,7 +1789,7 @@ def RunCommand( is_interactive ):
         print layer_locked_states_list
         ac_rechange_layer_state()
         
-        
+        rs.CurrentLayer(current_user_layer)
     
     
     
