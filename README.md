@@ -64,10 +64,11 @@ GPL License
 
 ### Citations
 Bibtex Citation:
-@misc{joret,
-  author       = {Joern Rettweiler},
-  title        = {Rhinopython Furniture },
-  date         = {2019-06-22},
-  year         = {2019},
-  url          = {https://github.com/masterblogger/rhinopython_furniture/edit/master}
+
+@misc{joret,  
+  author       = {Joern Rettweiler},https://github.com/masterblogger/rhinopython_furniture/edit/master/README.md  
+  title        = {Rhinopython Furniture },  
+  date         = {2019-06-22},   
+  year         = {2019},  
+  url          = {https://github.com/masterblogger/rhinopython_furniture/edit/master} 
 }
