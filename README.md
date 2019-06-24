@@ -60,3 +60,14 @@ GPL License
  drawer cabinet => https://youtu.be/urgOZJy7cQE
  
  trapezoid table => https://youtu.be/9-rQmNWUiuo
+
+
+### Citations
+Bibtex Citation:
+@misc{joret,
+  author       = {Joern Rettweiler},
+  title        = {Rhinopython Furniture },
+  date         = {2019-06-22},
+  year         = {2019},
+  url          = {https://github.com/masterblogger/rhinopython_furniture/edit/master}
+}
